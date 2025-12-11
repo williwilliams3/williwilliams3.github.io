@@ -440,16 +440,20 @@ ninja.data = [{
           description: "",
           section: "Books",handler: () => {
               window.location.href = "/books/the_godfather/";
-            },},{id: "news-a-simple-inline-announcement",
-          title: 'A simple inline announcement.',
+            },},{id: "news-giving-a-talk-about-our-work-geometric-no-u-turn-samplers-concepts-and-evaluation-at-pgm-2024",
+          title: '💬 Giving a talk about our work, Geometric No-U-Turn Samplers : Concepts and...',
           description: "",
-          section: "News",},{id: "news-a-long-announcement-with-details",
-          title: 'A long announcement with details',
+          section: "News",},{id: "news-our-paper-stochastic-variance-reduced-gaussian-variational-inference-on-the-bures-wasserstein-manifold-was-accepted-at-iclr-2025",
+          title: '🎉 Our paper Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold was...',
           description: "",
-          section: "News",handler: () => {
-              window.location.href = "/news/announcement_2/";
-            },},{id: "news-a-simple-inline-announcement-with-markdown-emoji-sparkles-smile",
-          title: 'A simple inline announcement with Markdown emoji! :sparkles: :smile:',
+          section: "News",},{id: "news-our-paper-geodesic-slice-sampler-for-multimodal-distributions-with-strong-curvature-was-accepted-at-uai-2025",
+          title: '🎉 Our paper Geodesic Slice Sampler for Multimodal Distributions with Strong Curvature was...',
+          description: "",
+          section: "News",},{id: "news-i-will-attend-genu-workshop-in-copenhagen-see-you-there",
+          title: '💬 I will attend GenU workshop in Copenhagen, see you there!',
+          description: "",
+          section: "News",},{id: "news-presenting-categorical-flow-matching-via-simplex-to-euclidean-bijections-at-the-neurips-2025-fpi-workshop",
+          title: '💬 Presenting Categorical Flow Matching via Simplex-to-Euclidean Bijections at the Neurips 2025 FPI...',
           description: "",
           section: "News",},{id: "projects-project-1",
           title: 'project 1',
