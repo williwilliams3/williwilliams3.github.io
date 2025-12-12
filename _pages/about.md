@@ -27,6 +27,6 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I am a PhD student in Computer Science at the University of Helsinki part of [Probabilistic Machine Learning Lab](https://www.helsinki.fi/en/researchgroups/probabilistic-machine-learning), my supervisors are [Arto Klami](https://www.cs.helsinki.fi/u/aklami/) and [Marcelo Hartmann](https://mahaa2.github.io/marcelohartmann/#home).
+I am a PhD student in Computer Science at the University of Helsinki, working in the [Probabilistic Machine Learning Lab](https://www.helsinki.fi/en/researchgroups/probabilistic-machine-learning). My supervisors are [Arto Klami](https://www.cs.helsinki.fi/u/aklami/) and [Marcelo Hartmann](https://mahaa2.github.io/marcelohartmann/#home).
 
-My research focuses on the development of statistical methods with a taste of Riemannian Geometry. My main research interests are Bayesian inference and generative models, see the selected publications below!
+My research focuses on developing statistical methods inspired by Riemannian geometry. My main interests include Bayesian inference and discrete generative models, see some selected publications below!
