@@ -1,6 +1,10 @@
 metadata:
-  last_updated: '2026-03-09'
+  last_updated: '2026-03-23'
 papers:
+  T2lhmNwAAAAJ:5nxA0vEk-isC:
+    citations: 0
+    title: Simplex-to-Euclidean Bijection for Conjugate and Calibrated Multiclass Gaussian Process
+    year: '2026'
   T2lhmNwAAAAJ:9yKSN-GCB0IC:
     citations: 8
     title: Scalable stochastic gradient riemannian langevin dynamics in non-diagonal metrics
