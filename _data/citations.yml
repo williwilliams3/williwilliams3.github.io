@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-05-06'
+  last_updated: '2026-05-11'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -44,7 +44,7 @@ papers:
   T2lhmNwAAAAJ:eQOLeE2rZwMC:
     citations: 3
     title: Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold
-    year: '2024'
+    year: '2025'
   T2lhmNwAAAAJ:hqOjcs7Dif8C:
     citations: 0
     title: Categorical Flow Matching via Simplex-to-Euclidean Bijections
