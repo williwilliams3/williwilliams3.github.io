@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-05-11'
+  last_updated: '2026-05-18'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -10,9 +10,13 @@ papers:
     title: Scalable stochastic gradient riemannian langevin dynamics in non-diagonal metrics
     year: '2023'
   T2lhmNwAAAAJ:IjCSPb-OGe4C:
-    citations: 24
+    citations: 25
     title: 'IRplus: an augmented tool to detect inverted repeats in plastid genomes'
     year: '2023'
+  T2lhmNwAAAAJ:MXK_kJrjxJIC:
+    citations: 9
+    title: Riemannian laplace approximation with the fisher metric
+    year: '2024'
   T2lhmNwAAAAJ:Tyk-4Ss8FVUC:
     citations: 1
     title: Generalized no-u-turn sampler for Lagrangian Monte Carlo
@@ -24,15 +28,7 @@ papers:
   T2lhmNwAAAAJ:UebtZRa9Y70C:
     citations: 1
     title: Simplex-to-Euclidean Bijections for Categorical Flow Matching
-    year: '2025'
-  T2lhmNwAAAAJ:W7OEmFMy1HYC:
-    citations: 0
-    title: Non-geodesically-convex optimization in the Wasserstein space
-    year: '2024'
-  T2lhmNwAAAAJ:WF5omc3nYNoC:
-    citations: 0
-    title: Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold
-    year: '2024'
+    year: '2026'
   T2lhmNwAAAAJ:Y0pCki6q_DkC:
     citations: 5
     title: Non-geodesically-convex optimization in the Wasserstein space
@@ -45,14 +41,6 @@ papers:
     citations: 3
     title: Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold
     year: '2025'
-  T2lhmNwAAAAJ:hqOjcs7Dif8C:
-    citations: 0
-    title: Categorical Flow Matching via Simplex-to-Euclidean Bijections
-    year: Unknown Year
-  T2lhmNwAAAAJ:qjMakFHDy7sC:
-    citations: 0
-    title: Warped metrics for optimisation and sampling in probabilistic models
-    year: Unknown Year
   T2lhmNwAAAAJ:u-x6o8ySG0sC:
     citations: 3
     title: "The ENDS of assumptions: an online tool for the epistemic non-parametric drug\u2013response scoring"
@@ -65,7 +53,3 @@ papers:
     citations: 1
     title: Geodesic slice sampler for multimodal distributions with strong curvature
     year: '2025'
-  T2lhmNwAAAAJ:zYLM7Y9cAGgC:
-    citations: 9
-    title: Riemannian laplace approximation with the fisher metric
-    year: '2023'
