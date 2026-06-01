@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-05-18'
+  last_updated: '2026-06-01'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -14,7 +14,7 @@ papers:
     title: 'IRplus: an augmented tool to detect inverted repeats in plastid genomes'
     year: '2023'
   T2lhmNwAAAAJ:MXK_kJrjxJIC:
-    citations: 9
+    citations: 10
     title: Riemannian laplace approximation with the fisher metric
     year: '2024'
   T2lhmNwAAAAJ:Tyk-4Ss8FVUC:
