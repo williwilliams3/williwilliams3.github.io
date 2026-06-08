@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-06-01'
+  last_updated: '2026-06-08'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -10,7 +10,7 @@ papers:
     title: Scalable stochastic gradient riemannian langevin dynamics in non-diagonal metrics
     year: '2023'
   T2lhmNwAAAAJ:IjCSPb-OGe4C:
-    citations: 25
+    citations: 26
     title: 'IRplus: an augmented tool to detect inverted repeats in plastid genomes'
     year: '2023'
   T2lhmNwAAAAJ:MXK_kJrjxJIC:
@@ -19,7 +19,7 @@ papers:
     year: '2024'
   T2lhmNwAAAAJ:Tyk-4Ss8FVUC:
     citations: 1
-    title: Generalized no-u-turn sampler for Lagrangian Monte Carlo
+    title: Generalized No-U-Turn sampler for Lagrangian Monte Carlo
     year: '2022'
   T2lhmNwAAAAJ:UeHWp8X0CEIC:
     citations: 1
@@ -44,10 +44,6 @@ papers:
   T2lhmNwAAAAJ:u-x6o8ySG0sC:
     citations: 3
     title: "The ENDS of assumptions: an online tool for the epistemic non-parametric drug\u2013response scoring"
-    year: '2022'
-  T2lhmNwAAAAJ:u5HHmVD_uO8C:
-    citations: 0
-    title: Generalized No-U-Turn Sampler for Lagrangian Monte Carlo
     year: '2022'
   T2lhmNwAAAAJ:ufrVoPGSRksC:
     citations: 1
