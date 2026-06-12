@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-06-08'
+  last_updated: '2026-06-12'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -34,7 +34,7 @@ papers:
     title: Non-geodesically-convex optimization in the Wasserstein space
     year: '2024'
   T2lhmNwAAAAJ:YsMSGLbcyi4C:
-    citations: 1
+    citations: 2
     title: 'Geometric No-U-Turn samplers: Concepts and evaluation'
     year: '2024'
   T2lhmNwAAAAJ:eQOLeE2rZwMC:
