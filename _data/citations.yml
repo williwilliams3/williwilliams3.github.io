@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-08-10'
+  last_updated: '2026-08-19'
 papers:
   T2lhmNwAAAAJ:5nxA0vEk-isC:
     citations: 0
@@ -10,7 +10,7 @@ papers:
     title: Scalable stochastic gradient riemannian langevin dynamics in non-diagonal metrics
     year: '2023'
   T2lhmNwAAAAJ:IjCSPb-OGe4C:
-    citations: 30
+    citations: 31
     title: 'IRplus: an augmented tool to detect inverted repeats in plastid genomes'
     year: '2023'
   T2lhmNwAAAAJ:MXK_kJrjxJIC:
@@ -41,6 +41,10 @@ papers:
     citations: 3
     title: Stochastic variance-reduced Gaussian variational inference on the Bures-Wasserstein manifold
     year: '2025'
+  T2lhmNwAAAAJ:kNdYIx-mwKoC:
+    citations: 0
+    title: Simplex-to-Euclidean Bijection for Conjugate and Calibrated Multiclass Gaussian Process Classification
+    year: '2026'
   T2lhmNwAAAAJ:u-x6o8ySG0sC:
     citations: 3
     title: "The ENDS of assumptions: an online tool for the epistemic non-parametric drug\u2013response scoring"
