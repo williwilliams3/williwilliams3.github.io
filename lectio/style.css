@@ -1,0 +1,52 @@
+:root { --paper:#faf9f6; --ink:#20333c; --muted:#66777b; --teal:#197f7b; --orange:#cf704c; --blue:#597bb8; --line:#d6deda; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); }
+.reveal { font-family:"Adwaita Sans","Helvetica Neue",Arial,sans-serif; font-size:28px; font-weight:400; color:var(--ink); }
+.reveal .slides { text-align:left; }
+.reveal .slides > section { width:100%; height:100%; padding:44px 64px 32px; }
+.reveal h1,.reveal h2,.reveal p,.reveal figure { margin:0; }
+.reveal h1 { font-size:59px; font-weight:500; line-height:1.12; letter-spacing:-2.1px; }
+.reveal h2 { font-size:46px; font-weight:500; line-height:1.12; letter-spacing:-1.35px; margin:0 0 20px; }
+.reveal canvas { display:block; width:100%; height:auto; }
+.reveal section > canvas,.reveal .visual-stage { position:absolute; left:64px; top:139px; width:calc(100% - 128px); height:502px; }
+.reveal .visual-stage canvas { width:100%; height:100%; }
+.reveal .bottom-caption { position:absolute; bottom:72px; left:64px; right:64px; font-size:27px; font-weight:400; line-height:1.2; }
+.reveal .source { position:absolute; bottom:35px; left:64px; right:64px; font-size:16px; color:var(--muted); }
+.reveal .scene-step { position:absolute; width:1px; height:1px; pointer-events:none; top:0; opacity:0!important; }
+.reveal .title-slide { padding:0; }
+.title-copy { position:absolute; left:64px; top:79px; z-index:1; }
+.reveal .eyebrow { font-size:19px; color:var(--teal); letter-spacing:1.8px; text-transform:uppercase; margin-bottom:35px; }
+.reveal .author { margin-top:39px; font-size:25px; }
+.reveal .affiliation { font-size:17px; color:var(--muted); margin-top:9px; }
+.reveal .university-logo { display:block; width:110px; height:auto; margin:28px 0 0; border:none; box-shadow:none; object-fit:contain; }
+.reveal .title-art { position:absolute; left:755px; top:42px; width:610px; height:591px; }
+.figure-pair { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-top:30px; }
+.reveal figcaption { font-size:25px; font-weight:400; margin-bottom:17px; }
+.reveal figure img { display:block; margin:0; width:100%; height:420px; object-fit:contain; border:none; background:transparent; mix-blend-mode:multiply; }
+.stage-reveal { position:absolute; inset:0; display:none; gap:50px; align-items:start; background:var(--paper); }
+.stage-reveal figure { min-width:0; }
+.stage-reveal img { height:350px!important; }
+.stage-reveal figcaption span { float:right; color:var(--teal); }
+section[data-scene="modes"][data-stage="1"] .mode-evidence { display:grid; grid-template-columns:1fr 1fr; }
+section[data-scene="flow"][data-stage="2"] .flow-evidence { display:grid; grid-template-columns:1fr 1fr; }
+.reveal .progress { color:var(--teal); height:3px; }
+.reveal .controls { color:var(--teal); right:12px; bottom:13px; font-size:8px; }
+.reveal .slide-number { font-family:inherit; color:var(--muted); background:none; font-size:14px; right:30px; bottom:9px; }
+.motion-tools { position:fixed; left:18px; bottom:10px; display:flex; gap:14px; z-index:31; opacity:0.18; transition:opacity .15s; }
+.motion-tools:hover,.motion-tools:focus-within { opacity:1; }
+.motion-tools button { color:var(--ink); background:none; border:none; font:13px "Adwaita Sans",Arial,sans-serif; cursor:pointer; padding:7px 0; }
+.motion-tools button:hover { color:var(--teal); }
+button:focus-visible { outline:2px solid var(--teal); outline-offset:4px; }
+dialog { max-width:540px; background:var(--paper); border:1px solid var(--line); padding:34px 38px; color:var(--ink); font:17px/1.5 "Adwaita Sans",Arial,sans-serif; }
+dialog::backdrop { background:#20333c60; }
+dialog h2 { margin-top:0; font-size:25px; font-weight:500; }
+dialog dl { display:grid; grid-template-columns:145px auto; gap:9px; }
+dialog dd { margin:0; color:var(--muted); }
+dialog button { padding:8px 18px; color:var(--ink); background:none; border:1px solid var(--line); font:inherit; cursor:pointer; }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; } }
+@media print {
+  body { background:var(--paper)!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  .motion-tools,dialog { display:none!important; }
+  .reveal .slides section { background:var(--paper)!important; }
+  .reveal canvas { visibility:visible!important; }
+}

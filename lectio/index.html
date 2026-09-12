@@ -1,0 +1,159 @@
+---
+layout: null
+permalink: /lectio/
+nav: false
+sitemap: false
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bernardo Williams's lectio praecursoria on geometric methods for Bayesian inference and discrete data modeling.">
+  <title>Geometric Methods · Bernardo Williams</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="lib/reveal/reveal.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section data-name="Geometric methods" data-scene="title" class="title-slide">
+        <div class="title-copy">
+          <p class="eyebrow">Lectio praecursoria</p>
+          <h1>Geometric Methods<br>for Bayesian Inference<br>and Modeling<br>Discrete Data</h1>
+          <p class="author">Bernardo Williams</p>
+          <p class="affiliation">University of Helsinki · 18 September 2026</p>
+          <img class="university-logo" src="assets/branding/university-of-helsinki.jpg" width="1121" height="1058" alt="University of Helsinki logo">
+        </div>
+        <canvas class="title-art" width="650" height="630" role="img" aria-label="A curved probability distribution and a probability simplex, the two geometric themes of the thesis"></canvas>
+      </section>
+
+      <section data-name="Exploring a mountain range" data-scene="mountains">
+        <h2>Exploring a mountain range</h2>
+        <canvas width="1280" height="490" role="img" aria-label="A hiker crosses a mountain range. The straight line and hiker become transparent underground. The alternative route is a numerical Monge geodesic with alpha 0.2, lifted onto the mountain surface between the same endpoints."></canvas>
+        <p class="bottom-caption stage-caption">How do we reach the other side?</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="The shape of uncertainty" data-scene="target">
+        <h2>The shape of uncertainty</h2>
+        <canvas width="1280" height="490" role="img" aria-label="Samples gradually cover a curved target distribution instead of describing it by a single point"></canvas>
+        <p class="bottom-caption">A representative set of possibilities</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+      </section>
+
+      <section data-name="Paths that follow the geometry" data-scene="geodesics">
+        <h2>Paths that follow the geometry</h2>
+        <canvas width="1280" height="490" role="img" aria-label="Straight paths and exact geodesics of an illustrative pullback metric carry the same starting velocities into different parts of a curved target"></canvas>
+        <p class="bottom-caption">The metric determines the path</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+      </section>
+
+      <section data-name="An approximation that follows curvature" data-scene="evidence" class="evidence-slide">
+        <h2>An approximation that follows curvature</h2>
+        <div class="figure-pair">
+          <figure><figcaption>Euclidean Laplace</figcaption><img src="assets/paper1/h_banana_euclidean.png" alt="Euclidean Laplace samples form a straight cloud and miss much of the banana-shaped target"></figure>
+          <figure class="fragment" data-fragment-index="0"><figcaption>Fisher Riemannian Laplace</figcaption><img src="assets/paper1/h_banana_fisher.png" alt="Fisher Riemannian Laplace samples follow the curved target more closely"></figure>
+        </div>
+        <p class="bottom-caption">Better geometric fit. Additional computation.</p>
+        <p class="source">Paper I · Yu, Hartmann, Williams, Girolami &amp; Klami · AISTATS 2024</p>
+      </section>
+
+      <section data-name="Reaching separated possibilities" data-scene="modes">
+        <h2>Reaching separated possibilities</h2>
+        <div class="visual-stage">
+          <canvas width="1280" height="490" role="img" aria-label="An inverse-metric geodesic crosses a low-density gap between two modes, accelerating through the gap"></canvas>
+          <div class="mode-evidence stage-reveal">
+            <figure><figcaption>Parallel tempering</figcaption><img src="assets/paper2/rebutal/field_pt.png" alt="Parallel tempering samples in the thesis Allen–Cahn experiment"></figure>
+            <figure><figcaption>Geodesic meta-sampler</figcaption><img src="assets/paper2/rebutal/field_meta.png" alt="Meta-MAGSS samples explore additional configurations in the thesis Allen–Cahn experiment"></figure>
+          </div>
+        </div>
+        <p class="bottom-caption stage-caption">Faster motion through low-density regions</p>
+        <p class="source">Paper II · Williams et al. · UAI 2025</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+      </section>
+
+      <section data-name="Probabilities form a triangle" data-scene="simplex">
+        <h2>Probabilities form a triangle</h2>
+        <canvas width="1280" height="490" role="img" aria-label="The probabilities of categories A, B and C locate a point in the simplex; the point moves as the probability allocation changes"></canvas>
+        <p class="bottom-caption">Three probabilities. Two free coordinates.</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="A different set of coordinates" data-scene="ilr">
+        <h2>A different set of coordinates</h2>
+        <canvas width="1280" height="490" role="img" aria-label="A straight line and circles in ILR coordinates correspond to an Aitchison geodesic and equal-distance curves inside the probability simplex"></canvas>
+        <p class="bottom-caption">Relative probabilities become ordinary coordinates</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="A continuous representation of a category" data-scene="interpolation">
+        <h2>A continuous representation of a category</h2>
+        <canvas width="1280" height="490" role="img" aria-label="Points move from each category corner to its own interior region using a label-preserving stochastic interpolation"></canvas>
+        <p class="bottom-caption">Move inside. Keep the category.</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="Generating discrete data" data-scene="flow">
+        <h2>Generating discrete data</h2>
+        <div class="visual-stage">
+          <canvas width="1280" height="490" role="img" aria-label="An analytically defined continuous velocity field transports Gaussian noise to three latent clusters, maps to the simplex, and decodes to categories"></canvas>
+          <div class="flow-evidence stage-reveal">
+            <figure><figcaption>Direct simplex flow <span>25.9%</span></figcaption><img src="assets/paper3/checkerboard/linear.png" alt="Direct simplex flow produces 25.9 percent samples outside the checkerboard target support"></figure>
+            <figure><figcaption>ILR coordinates <span>6.8%</span></figcaption><img src="assets/paper3/checkerboard/ilr.png" alt="Flow matching in ILR coordinates produces 6.8 percent samples outside the checkerboard target support"></figure>
+          </div>
+        </div>
+        <p class="bottom-caption stage-caption">Learn in continuous coordinates. Generate categories.</p>
+        <p class="source">Paper III · Williams, Yeom-Song, Hartmann &amp; Klami · AISTATS 2026</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="Multiclass classification" data-scene="multiclass">
+        <h2>Multiclass classification</h2>
+        <canvas width="1280" height="490" role="img" aria-label="A classifier learns from labelled examples of A, B and C, then assigns a new character to one of those three classes"></canvas>
+        <p class="bottom-caption">One input. One of several categories.</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+      </section>
+
+      <section data-name="Classification with uncertainty" data-scene="classification">
+        <h2>Classification with uncertainty</h2>
+        <div class="visual-stage">
+          <canvas width="1280" height="490" role="img" aria-label="A Gaussian predictive distribution in latent coordinates maps to probability vectors in the simplex; a separate calibration illustration shows eight correct predictions out of ten"></canvas>
+        </div>
+        <p class="bottom-caption stage-caption">Exact latent inference in the constructed Gaussian model</p>
+        <p class="source">Paper IV · Williams, Tetali, Klami &amp; Hartmann</p>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+      </section>
+
+      <section data-name="Geometry as a modeling choice" data-scene="closing" class="closing-slide">
+        <h2>Geometry as a modeling choice</h2>
+        <canvas width="1280" height="490" role="img" aria-label="The two contributions: paths adapted to target distributions and useful Euclidean representations of the simplex"></canvas>
+        <p class="bottom-caption">More faithful exploration. Useful representations.</p>
+      </section>
+    </div>
+  </div>
+
+  <nav class="motion-tools" aria-label="Animation controls">
+    <button id="replay" type="button" title="Replay the current animation (R)">Replay</button>
+    <button id="motion" type="button" title="Pause or resume motion (M)" aria-pressed="false">Pause motion</button>
+    <button id="help" type="button" title="Presentation controls (H)">Keys</button>
+  </nav>
+  <dialog id="help-dialog">
+    <h2>Presentation controls</h2>
+    <dl><dt>Space / →</dt><dd>Next step</dd><dt>←</dt><dd>Previous step</dd><dt>R</dt><dd>Replay animation</dd><dt>M</dt><dd>Pause / resume motion</dd><dt>F</dt><dd>Fullscreen</dd><dt>Esc</dt><dd>Slide overview</dd><dt>1 / 0</dt><dd>First / last slide</dd></dl>
+    <p>Animations run once and settle. Clicks advance the explanation.</p>
+    <button id="close-help" type="button">Close</button>
+  </dialog>
+  <script src="lib/reveal/reveal.js"></script>
+  <script src="geometry.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
