@@ -44,4 +44,9 @@ jobs:
         with:
           fail: true
           # only check local links
-          args: --offline --remap '_site(/?.*)/assets/(.*) _site/assets/$2' --verbose --no-progress '_site/**/*.html'
+          # Preserve the standalone deck's bundled paths before the site's asset remap.
+          args: >-
+            --offline
+            --remap '_site/lectio/(.*) _site/lectio/$1'
+            --remap '_site(/?.*)/assets/(.*) _site/assets/$2'
+            --verbose --no-progress '_site/**/*.html'
