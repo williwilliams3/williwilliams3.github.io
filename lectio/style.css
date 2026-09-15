@@ -11,24 +11,54 @@ body { margin:0; background:var(--paper); color:var(--ink); }
 .reveal section > canvas,.reveal .visual-stage { position:absolute; left:64px; top:139px; width:calc(100% - 128px); height:502px; }
 .reveal .visual-stage canvas { width:100%; height:100%; }
 .reveal .bottom-caption { position:absolute; bottom:72px; left:64px; right:64px; font-size:27px; font-weight:400; line-height:1.2; }
-.reveal .source { position:absolute; bottom:35px; left:64px; right:64px; font-size:16px; color:var(--muted); }
+.reveal .source { position:absolute; bottom:24px; left:64px; right:64px; font-size:15px; line-height:1.22; color:var(--muted); }
+.reveal .source cite { font-style:italic; }
 .reveal .scene-step { position:absolute; width:1px; height:1px; pointer-events:none; top:0; opacity:0!important; }
+.reveal .learning-slide > h2 { font-size:40px; line-height:1.12; }
+.reveal .learning-title-inference { color:var(--teal); }
+.reveal .learning-title-discrete { color:var(--orange); }
+.reveal .learning-slide > canvas { top:153px; height:490px; }
+.learning-discrete { position:absolute; left:764px; top:167px; width:552px; height:466px; }
+.learning-block-title { color:var(--orange); font-size:29px; font-weight:500; line-height:1.15; }
+.learning-block-question { margin-top:7px!important; color:var(--muted); font-size:21px; line-height:1.2; }
+.learning-example-heading { font-size:23px; font-weight:500; line-height:1.2; }
+.learning-example-heading span { margin-left:12px; color:var(--muted); font-size:16px; font-weight:400; }
+.learning-dna { margin-top:39px; }
+.learning-dna-stream { margin-top:18px!important; font:500 22px/1.55 "Adwaita Mono","SFMono-Regular",Consolas,monospace; letter-spacing:4px; white-space:nowrap; }
+.learning-language { margin-top:31px; }
+.learning-language-stream { max-width:540px; margin-top:15px!important; color:var(--ink); font-size:19px; line-height:1.38; }
+.learning-discrete-caption { position:absolute; bottom:0; left:0; right:0; color:var(--orange); font-size:20px; text-align:center; }
 .reveal .title-slide { padding:0; }
 .title-copy { position:absolute; left:64px; top:79px; z-index:1; }
 .reveal .eyebrow { font-size:19px; color:var(--teal); letter-spacing:1.8px; text-transform:uppercase; margin-bottom:35px; }
+.reveal .title-inference { color:var(--teal); }
+.reveal .title-discrete { color:var(--orange); }
 .reveal .author { margin-top:39px; font-size:25px; }
 .reveal .affiliation { font-size:17px; color:var(--muted); margin-top:9px; }
 .reveal .university-logo { display:block; width:110px; height:auto; margin:28px 0 0; border:none; box-shadow:none; object-fit:contain; }
 .reveal .title-art { position:absolute; left:755px; top:42px; width:610px; height:591px; }
+.reveal .slides > section.part-divider { display:flex; flex-direction:column; justify-content:center; padding:0 120px; color:var(--paper); }
+.reveal .part-divider h2 { max-width:1120px; margin:0; color:var(--paper); font-size:72px; line-height:1.12; letter-spacing:-2.2px; }
+.reveal .part-label { margin-bottom:30px; color:var(--paper); font-size:20px; font-weight:500; letter-spacing:2.2px; text-transform:uppercase; opacity:.78; }
+.reveal .part-inference { background:var(--teal); }
+.reveal .part-discrete { background:var(--orange); }
+.reveal section[data-part="inference"]:not(.part-divider) > h2 { color:var(--teal); }
+.reveal section[data-part="discrete"]:not(.part-divider) > h2 { color:var(--orange); }
 .figure-pair { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-top:30px; }
 .reveal figcaption { font-size:25px; font-weight:400; margin-bottom:17px; }
 .reveal figure img { display:block; margin:0; width:100%; height:420px; object-fit:contain; border:none; background:transparent; mix-blend-mode:multiply; }
-.stage-reveal { position:absolute; inset:0; display:none; gap:50px; align-items:start; background:var(--paper); }
-.stage-reveal figure { min-width:0; }
-.stage-reveal img { height:350px!important; }
-.stage-reveal figcaption span { float:right; color:var(--teal); }
-section[data-scene="modes"][data-stage="1"] .mode-evidence { display:grid; grid-template-columns:1fr 1fr; }
-section[data-scene="flow"][data-stage="2"] .flow-evidence { display:grid; grid-template-columns:1fr 1fr; }
+.discrete-examples { position:absolute; left:64px; right:64px; top:170px; height:414px; display:grid; grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr); gap:58px; align-items:start; }
+.discrete-example { min-width:0; }
+.example-divider { width:1px; height:100%; background:var(--line); }
+.example-heading { font-size:31px; font-weight:500; line-height:1.15; }
+.example-kicker { margin-top:7px!important; color:var(--muted); font-size:18px; letter-spacing:.4px; }
+.dna-stream { margin-top:38px; font:500 28px/1.62 "Adwaita Mono","SFMono-Regular",Consolas,monospace; letter-spacing:5px; white-space:nowrap; }
+.base-a { color:#b55449; }
+.base-c { color:var(--blue); }
+.base-g { color:var(--teal); }
+.base-t { color:var(--orange); }
+.language-stream { max-width:545px; margin-top:36px!important; font-size:24px; line-height:1.48; color:var(--ink); }
+.example-alphabet { margin-top:30px!important; color:var(--muted); font-size:20px; letter-spacing:.7px; }
 .reveal .progress { color:var(--teal); height:3px; }
 .reveal .controls { color:var(--teal); right:12px; bottom:13px; font-size:8px; }
 .reveal .slide-number { font-family:inherit; color:var(--muted); background:none; font-size:14px; right:30px; bottom:9px; }
@@ -48,5 +78,7 @@ dialog button { padding:8px 18px; color:var(--ink); background:none; border:1px 
   body { background:var(--paper)!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
   .motion-tools,dialog { display:none!important; }
   .reveal .slides section { background:var(--paper)!important; }
+  .reveal .slides section.part-inference { background:var(--teal)!important; }
+  .reveal .slides section.part-discrete { background:var(--orange)!important; }
   .reveal canvas { visibility:visible!important; }
 }

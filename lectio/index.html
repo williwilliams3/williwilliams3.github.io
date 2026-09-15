@@ -23,7 +23,7 @@ sitemap: false
       <section data-name="Geometric methods" data-scene="title" class="title-slide">
         <div class="title-copy">
           <p class="eyebrow">Lectio praecursoria</p>
-          <h1>Geometric Methods<br>for Bayesian Inference<br>and Modeling<br>Discrete Data</h1>
+          <h1>Geometric Methods<br>for <span class="title-inference">Bayesian Inference</span><br>and <span class="title-discrete">Modeling</span><br><span class="title-discrete">Discrete Data</span></h1>
           <p class="author">Bernardo Williams</p>
           <p class="affiliation">University of Helsinki · 18 September 2026</p>
           <img class="university-logo" src="assets/branding/university-of-helsinki.jpg" width="1121" height="1058" alt="University of Helsinki logo">
@@ -31,7 +31,33 @@ sitemap: false
         <canvas class="title-art" width="650" height="630" role="img" aria-label="A curved probability distribution and a probability simplex, the two geometric themes of the thesis"></canvas>
       </section>
 
-      <section data-name="Exploring a mountain range" data-scene="mountains">
+      <section data-name="Learning from data" data-scene="learning" class="learning-slide">
+        <h2>Geometric Methods<br>for <span class="learning-title-inference">Bayesian Inference</span> and <span class="learning-title-discrete">Modeling Discrete Data</span></h2>
+        <canvas width="1280" height="490" role="img" aria-label="Bayesian inference uses a Gaussian process posterior over plausible functions. This appears beside examples of discrete data."></canvas>
+        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <div class="learning-discrete fragment" data-fragment-index="1" aria-label="Discrete data examples: DNA sequences over four nucleotide symbols and language over letters plus a space character">
+          <p class="learning-block-title">Discrete Data</p>
+          <p class="learning-block-question">Data built from a finite alphabet</p>
+          <div class="learning-example learning-dna">
+            <p class="learning-example-heading">DNA sequences <span>4-symbol alphabet</span></p>
+            <p class="learning-dna-stream" aria-hidden="true"><span class="base-a">A</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-a">A</span><span class="base-a">A</span><br><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-a">A</span></p>
+          </div>
+          <div class="learning-example learning-language">
+            <p class="learning-example-heading">Language <span>27-symbol alphabet</span></p>
+            <p class="learning-language-stream">the founder of modern anarchist theory in what is property proudhon answers with the famous accusation property is theft</p>
+          </div>
+          <p class="learning-discrete-caption">Finite alphabets. Rich structures.</p>
+        </div>
+        <p class="bottom-caption fragment" data-fragment-index="1">Two problems. Two geometries.</p>
+        <span class="fragment scene-step" data-fragment-index="1"></span>
+      </section>
+
+      <section data-name="Geometric Methods for Bayesian Inference" class="part-divider part-inference" data-part="inference">
+        <p class="part-label">Part I</p>
+        <h2>Geometric Methods<br>for Bayesian Inference</h2>
+      </section>
+
+      <section data-name="Exploring a mountain range" data-scene="mountains" data-part="inference">
         <h2>Exploring a mountain range</h2>
         <canvas width="1280" height="490" role="img" aria-label="A hiker crosses a mountain range. The straight line and hiker become transparent underground. The alternative route is a numerical Monge geodesic with alpha 0.2, lifted onto the mountain surface between the same endpoints."></canvas>
         <p class="bottom-caption stage-caption">How do we reach the other side?</p>
@@ -39,53 +65,51 @@ sitemap: false
         <span class="fragment scene-step" data-fragment-index="1"></span>
       </section>
 
-      <section data-name="The shape of uncertainty" data-scene="target">
+      <section data-name="The shape of uncertainty" data-scene="target" data-part="inference">
         <h2>The shape of uncertainty</h2>
         <canvas width="1280" height="490" role="img" aria-label="Samples gradually cover a curved target distribution instead of describing it by a single point"></canvas>
         <p class="bottom-caption">A representative set of possibilities</p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
       </section>
 
-      <section data-name="Paths that follow the geometry" data-scene="geodesics">
+      <section data-name="Paths that follow the geometry" data-scene="geodesics" data-part="inference">
         <h2>Paths that follow the geometry</h2>
         <canvas width="1280" height="490" role="img" aria-label="Straight paths and exact geodesics of an illustrative pullback metric carry the same starting velocities into different parts of a curved target"></canvas>
         <p class="bottom-caption">The metric determines the path</p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
       </section>
 
-      <section data-name="An approximation that follows curvature" data-scene="evidence" class="evidence-slide">
+      <section data-name="An approximation that follows curvature" data-scene="evidence" data-part="inference" class="evidence-slide">
         <h2>An approximation that follows curvature</h2>
         <div class="figure-pair">
-          <figure><figcaption>Euclidean Laplace</figcaption><img src="assets/paper1/h_banana_euclidean.png" alt="Euclidean Laplace samples form a straight cloud and miss much of the banana-shaped target"></figure>
-          <figure class="fragment" data-fragment-index="0"><figcaption>Fisher Riemannian Laplace</figcaption><img src="assets/paper1/h_banana_fisher.png" alt="Fisher Riemannian Laplace samples follow the curved target more closely"></figure>
+          <figure><figcaption>Euclidean Laplace</figcaption><img src="assets/paper1/f_banana_hausdorff_euclidean.png" alt="Euclidean Laplace samples centered at the red Hausdorff MAP miss much of the banana-shaped target"></figure>
+          <figure class="fragment" data-fragment-index="0"><figcaption>Fisher Riemannian Laplace</figcaption><img src="assets/paper1/f_banana_hausdorff_fisher.png" alt="Fisher Riemannian Laplace samples centered at the red Hausdorff MAP follow the banana-shaped target"></figure>
         </div>
         <p class="bottom-caption">Better geometric fit. Additional computation.</p>
-        <p class="source">Paper I · Yu, Hartmann, Williams, Girolami &amp; Klami · AISTATS 2024</p>
+        <p class="source">Paper I · <cite>Riemannian Laplace Approximation with the Fisher Metric</cite><br><span>Yu, Hartmann, Williams, Girolami &amp; Klami · AISTATS 2024</span></p>
       </section>
 
-      <section data-name="Reaching separated possibilities" data-scene="modes">
+      <section data-name="Reaching separated possibilities" data-scene="modes" data-part="inference">
         <h2>Reaching separated possibilities</h2>
-        <div class="visual-stage">
-          <canvas width="1280" height="490" role="img" aria-label="An inverse-metric geodesic crosses a low-density gap between two modes, accelerating through the gap"></canvas>
-          <div class="mode-evidence stage-reveal">
-            <figure><figcaption>Parallel tempering</figcaption><img src="assets/paper2/rebutal/field_pt.png" alt="Parallel tempering samples in the thesis Allen–Cahn experiment"></figure>
-            <figure><figcaption>Geodesic meta-sampler</figcaption><img src="assets/paper2/rebutal/field_meta.png" alt="Meta-MAGSS samples explore additional configurations in the thesis Allen–Cahn experiment"></figure>
-          </div>
-        </div>
-        <p class="bottom-caption stage-caption">Faster motion through low-density regions</p>
-        <p class="source">Paper II · Williams et al. · UAI 2025</p>
-        <span class="fragment scene-step" data-fragment-index="0"></span>
+        <canvas width="1280" height="490" role="img" aria-label="An inverse-metric geodesic crosses a low-density gap between two modes, accelerating through the gap"></canvas>
+        <p class="bottom-caption">Faster motion through low-density regions</p>
+        <p class="source">Paper II · <cite>Geodesic Slice Sampler for Multimodal Distributions with Strong Curvature</cite><br><span>Williams et al. · UAI 2025</span></p>
       </section>
 
-      <section data-name="Probabilities form a triangle" data-scene="simplex">
+      <section data-name="Geometric Methods for Modeling Discrete Data" class="part-divider part-discrete" data-part="discrete">
+        <p class="part-label">Part II</p>
+        <h2>Geometric Methods<br>for Modeling Discrete Data</h2>
+      </section>
+
+      <section data-name="Probabilities form a triangle" data-scene="simplex" data-part="discrete">
         <h2>Probabilities form a triangle</h2>
-        <canvas width="1280" height="490" role="img" aria-label="The probabilities of categories A, B and C locate a point in the simplex; the point moves as the probability allocation changes"></canvas>
+        <canvas width="1280" height="490" role="img" aria-label="A bordered pixel image of an unclear handwritten A is assigned probabilities for categories A, B and C; those probabilities locate a moving point in the simplex"></canvas>
         <p class="bottom-caption">Three probabilities. Two free coordinates.</p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
         <span class="fragment scene-step" data-fragment-index="1"></span>
       </section>
 
-      <section data-name="A different set of coordinates" data-scene="ilr">
+      <section data-name="A different set of coordinates" data-scene="ilr" data-part="discrete">
         <h2>A different set of coordinates</h2>
         <canvas width="1280" height="490" role="img" aria-label="A straight line and circles in ILR coordinates correspond to an Aitchison geodesic and equal-distance curves inside the probability simplex"></canvas>
         <p class="bottom-caption">Relative probabilities become ordinary coordinates</p>
@@ -93,49 +117,59 @@ sitemap: false
         <span class="fragment scene-step" data-fragment-index="1"></span>
       </section>
 
-      <section data-name="A continuous representation of a category" data-scene="interpolation">
+      <section data-name="A continuous representation of a category" data-scene="interpolation" data-part="discrete">
         <h2>A continuous representation of a category</h2>
         <canvas width="1280" height="490" role="img" aria-label="Points move from each category corner to its own interior region using a label-preserving stochastic interpolation"></canvas>
         <p class="bottom-caption">Move inside. Keep the category.</p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
-        <span class="fragment scene-step" data-fragment-index="1"></span>
       </section>
 
-      <section data-name="Generating discrete data" data-scene="flow">
+      <section data-name="Generating discrete data" data-part="discrete">
         <h2>Generating discrete data</h2>
-        <div class="visual-stage">
-          <canvas width="1280" height="490" role="img" aria-label="An analytically defined continuous velocity field transports Gaussian noise to three latent clusters, maps to the simplex, and decodes to categories"></canvas>
-          <div class="flow-evidence stage-reveal">
-            <figure><figcaption>Direct simplex flow <span>25.9%</span></figcaption><img src="assets/paper3/checkerboard/linear.png" alt="Direct simplex flow produces 25.9 percent samples outside the checkerboard target support"></figure>
-            <figure><figcaption>ILR coordinates <span>6.8%</span></figcaption><img src="assets/paper3/checkerboard/ilr.png" alt="Flow matching in ILR coordinates produces 6.8 percent samples outside the checkerboard target support"></figure>
+        <div class="discrete-examples" role="img" aria-label="Examples of generated discrete data: DNA sequences over four nucleotide symbols and language over letters plus a space character">
+          <div class="discrete-example dna-example">
+            <p class="example-heading">DNA sequences</p>
+            <p class="example-kicker">4-symbol alphabet</p>
+            <div class="dna-stream" aria-hidden="true">
+              <div><span class="base-a">A</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-a">A</span><span class="base-a">A</span></div>
+              <div><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-a">A</span></div>
+              <div><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-g">G</span></div>
+              <div><span class="base-a">A</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-c">C</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-t">T</span><span class="base-g">G</span></div>
+            </div>
+            <p class="example-alphabet"><span class="base-a">A</span> · <span class="base-c">C</span> · <span class="base-g">G</span> · <span class="base-t">T</span></p>
+          </div>
+          <div class="example-divider" aria-hidden="true"></div>
+          <div class="discrete-example language-example">
+            <p class="example-heading">Language</p>
+            <p class="example-kicker">27-symbol alphabet</p>
+            <p class="language-stream">the founder of modern anarchist theory in what is property proudhon answers with the famous accusation property is theft in this work he opposed the institution of decreed property</p>
+            <p class="example-alphabet">a · b · c · … · z · space</p>
           </div>
         </div>
-        <p class="bottom-caption stage-caption">Learn in continuous coordinates. Generate categories.</p>
-        <p class="source">Paper III · Williams, Yeom-Song, Hartmann &amp; Klami · AISTATS 2026</p>
-        <span class="fragment scene-step" data-fragment-index="0"></span>
-        <span class="fragment scene-step" data-fragment-index="1"></span>
+        <p class="bottom-caption">Finite alphabets. Rich structures.</p>
+        <p class="source">Paper III · <cite>Simplex-to-Euclidean Bijections for Categorical Flow Matching</cite><br><span>Williams, Yeom-Song, Hartmann &amp; Klami · AISTATS 2026</span></p>
       </section>
 
-      <section data-name="Multiclass classification" data-scene="multiclass">
+      <section data-name="Multiclass classification" data-scene="multiclass" data-part="discrete">
         <h2>Multiclass classification</h2>
-        <canvas width="1280" height="490" role="img" aria-label="A classifier learns from labelled examples of A, B and C, then assigns a new character to one of those three classes"></canvas>
+        <canvas width="1280" height="490" role="img" aria-label="A classifier learns from bordered pixel images of A, B and C, then assigns a new unclear pixel image to one of those three classes"></canvas>
         <p class="bottom-caption">One input. One of several categories.</p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
       </section>
 
-      <section data-name="Classification with uncertainty" data-scene="classification">
+      <section data-name="Classification with uncertainty" data-scene="classification" data-part="discrete">
         <h2>Classification with uncertainty</h2>
         <div class="visual-stage">
           <canvas width="1280" height="490" role="img" aria-label="A Gaussian predictive distribution in latent coordinates maps to probability vectors in the simplex; a separate calibration illustration shows eight correct predictions out of ten"></canvas>
         </div>
         <p class="bottom-caption stage-caption">Exact latent inference in the constructed Gaussian model</p>
-        <p class="source">Paper IV · Williams, Tetali, Klami &amp; Hartmann</p>
+        <p class="source">Paper IV · <cite>Simplex-to-Euclidean Bijection for Conjugate and Calibrated Multiclass Gaussian Process Classification</cite><br><span>Williams, Tetali, Klami &amp; Hartmann</span></p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
       </section>
 
       <section data-name="Geometry as a modeling choice" data-scene="closing" class="closing-slide">
         <h2>Geometry as a modeling choice</h2>
-        <canvas width="1280" height="490" role="img" aria-label="The two contributions: paths adapted to target distributions and useful Euclidean representations of the simplex"></canvas>
+        <canvas width="1280" height="490" role="img" aria-label="The two thesis contributions: Papers I and II use paths adapted to target distributions; Papers III and IV use useful Euclidean representations of the simplex"></canvas>
         <p class="bottom-caption">More faithful exploration. Useful representations.</p>
       </section>
     </div>

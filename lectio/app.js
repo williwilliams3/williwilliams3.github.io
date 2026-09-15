@@ -5,6 +5,13 @@
   const C = { paper:'#faf9f6', ink:'#20333c', muted:'#687c80', line:'#d4deda', teal:'#197f7b', orange:'#cf704c', blue:'#597bb8', pale:'#e5efea' };
   const colors = [C.teal, C.orange, C.blue];
   const letters = ['A', 'B', 'C'];
+  const pixelGlyphs = {
+    A:['000111000','001101100','011000110','110000011','110000011','111111111','110000011','110000011','110000011','000000000'],
+    B:['111111000','110000110','110000110','111111000','110000110','110000011','110000110','111111000','000000000','000000000'],
+    C:['001111100','011000110','110000000','110000000','110000000','110000000','110000000','011000110','001111100','000000000'],
+    'A?':['000111000','002101200','011000110','110000011','110000001','111101111','110000011','010000011','110000010','000010000'],
+    'B?':['111111000','110000110','110000010','111111000','110000110','110000010','110000110','111101000','000001000','000000000'],
+  };
   const tau = 2 * Math.PI;
   const ease = t => { t = G.clamp(t); return t * t * (3 - 2 * t); };
   const frac = (seconds, start, duration) => ease((seconds - start) / duration);
@@ -20,13 +27,13 @@
     const p = G.interpolateCategory(k, G.dirichlet(random), 0.5);
     return { k, p, z:G.ilr(p), base:[G.normal(random) * 0.52, G.normal(random) * 0.52] };
   });
+  const learningInputs=[-2.2,-1.65,-1.1,-.5,.05,.6,1.15];
+  const learningTargets=[-.56,-.82,-.64,-.3,.08,.4,.63];
+  const learningGrid=Array.from({length:141},(_,i)=>-2.5+6*i/140);
+  const learningGp=G.gaussianProcessPosterior(learningInputs,learningTargets,learningGrid,{lengthScale:1.05,signalVariance:.95,noiseStd:.1,sampleCount:7,seed:20260918});
   const inverseTraversal = G.inverseMetricTraversal();
   const mountainAlpha = .2;
   const mountainRoute = G.terrainRoute({alpha:mountainAlpha});
-  const flowPaths=gaussian.slice(0,240).map(z=>{
-    const path=G.mixtureFlow(z.map(a=>a*.7));
-    return {path,k:G.argmax(G.inverseIlr(path.at(-1)))};
-  });
   const sections = [...document.querySelectorAll('.slides > section')];
 
   function text(ctx, value, x, y, size=24, color=C.ink, align='left', weight=400) {
@@ -45,6 +52,22 @@
   }
   function polygon(ctx, pts, fill, alpha=1) {
     ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle=fill; ctx.beginPath(); pts.forEach((p,i) => i ? ctx.lineTo(...p):ctx.moveTo(...p)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function pixelGlyph(ctx,key,x,y,size,alpha=1,variant=0) {
+    const pixels=pixelGlyphs[key] ?? pixelGlyphs.A, rows=pixels.length, cols=pixels[0].length;
+    const left=Math.round(x-size/2),top=Math.round(y-size/2),frame=Math.max(3,Math.round(size*.055));
+    const inner=size-2*frame,cell=Math.floor(Math.min(inner/cols,inner/rows));
+    const gx=left+Math.round((size-cell*cols)/2),gy=top+Math.round((size-cell*rows)/2);
+    ctx.save();ctx.globalAlpha*=alpha;ctx.imageSmoothingEnabled=false;
+    ctx.fillStyle=C.paper;ctx.fillRect(left,top,size,size);
+    ctx.strokeStyle=C.line;ctx.lineWidth=size>=80?3:1.5;ctx.strokeRect(left+.5,top+.5,size-1,size-1);
+    ctx.fillStyle='#18272e';ctx.fillRect(left+frame,top+frame,size-2*frame,size-2*frame);
+    pixels.forEach((row,r)=>[...row].forEach((value,c)=>{
+      if(value==='0'||(variant&&(r*7+c*13+variant)%37===0))return;
+      ctx.fillStyle=value==='2'?'#8fa19f':'#edf1ed';
+      ctx.fillRect(gx+c*cell,gy+r*cell,cell,cell);
+    }));
+    ctx.restore();
   }
   function chart(x,y,w,h,xmin=-3,xmax=3,ymin=-3,ymax=3) {
     return {x,y,w,h, map:p=>[x+(p[0]-xmin)/(xmax-xmin)*w, y+h-(p[1]-ymin)/(ymax-ymin)*h]};
@@ -130,7 +153,7 @@
 
   const scenes = {
     title(ctx,t) {
-      const b=chart(36,0,566,280,-2.6,4,-2.7,2.7);
+      const b=chart(36,0,566,280,-2.85,4,-2.95,2.95);
       bananaPlot(ctx,b);
       const progress=frac(t,.2,4);
       gaussian.slice(0,170).forEach((z,i)=>{
@@ -138,6 +161,32 @@
       });
       const tr=triangle(326,452,327); drawTriangle(ctx,tr,{labels:false});
       categoryPoints.slice(0,150).forEach(({p,k})=>dot(ctx,tr.map(G.mix([1/3,1/3,1/3],p,progress)),2.4,colors[k],.48));
+    },
+    learning(ctx,t,stage) {
+      const left=chart(28,100,552,264,-2.5,3.5,-2.7,2.7);
+
+      text(ctx,'Bayesian Inference',28,20,29,C.teal,'left',500);
+      text(ctx,'Which models remain plausible?',28,58,21,C.muted);
+      line(ctx,[[640,13],[640,466]],C.line,1.4,.9);
+
+      line(ctx,[left.map([-2.5,0]),left.map([3.5,0])],C.line,1.1,.7);
+      line(ctx,[left.map([0,-2.7]),left.map([0,2.7])],C.line,1.1,.7);
+      ctx.save();ctx.beginPath();ctx.rect(left.x,left.y,left.w,left.h);ctx.clip();
+      const posteriorAlpha=stage>=2?.4:stage>=1?.4*frac(t,0,.6):0;
+      if(posteriorAlpha>0)learningGp.samples.forEach(sample=>line(
+          ctx,
+          learningGrid.map((x,i)=>left.map([x,sample[i]])),
+          C.blue,1.8,posteriorAlpha
+        ));
+      line(ctx,learningGrid.map((x,i)=>left.map([x,learningGp.mean[i]])),C.orange,3.2,.96);
+      learningInputs.forEach((x,i)=>{
+        const p=left.map([x,learningTargets[i]]);
+        dot(ctx,p,5.5,C.ink);ring(ctx,p,8.5,C.paper,.95,2.5);
+      });
+      ctx.restore();
+      legend(ctx,'Posterior mean',67,400,C.orange);
+      if(stage>=1)legend(ctx,'Posterior predictions',316,400,C.blue);
+      text(ctx,stage>=1?'A distribution over possible models':'One fitted model',304,455,20,stage>=1?C.teal:C.orange,'center');
     },
     mountains(ctx,t,stage) {
       drawMountainTerrain(ctx);
@@ -171,7 +220,7 @@
       traveller(ctx,mountainProject(point),t,moving,stage===1?G.undergroundOpacity(point):1);
     },
     target(ctx,t,stage) {
-      const ch=chart(342,17,750,422,-2.6,4,-2.8,2.8);
+      const ch=chart(342,17,750,422,-2.85,4,-2.95,2.95);
       bananaPlot(ctx,ch);
       if(stage>=1) {
         const n=Math.floor(gaussian.length*frac(t,0,5));
@@ -185,7 +234,7 @@
       text(ctx,'Target distribution',1120,27,22,C.muted,'right');
     },
     geodesics(ctx,t,stage) {
-      const left=chart(8,70,566,346,-2.6,3.6,-2.5,2.5),right=chart(701,70,566,346,-2.6,3.6,-2.5,2.5);
+      const left=chart(8,70,566,346,-2.85,3.6,-2.95,2.95),right=chart(701,70,566,346,-2.85,3.6,-2.95,2.95);
       text(ctx,'Straight paths',left.x,22,27,C.orange);text(ctx,'Geodesic paths',right.x,22,27,C.teal);
       bananaPlot(ctx,left,true);bananaPlot(ctx,right,true,stage?1:.35);
       const s=frac(t,.25,4.5);
@@ -199,8 +248,7 @@
       dot(ctx,left.map([-1.3,0]),7,C.ink);dot(ctx,right.map([-1.3,0]),7,C.ink);
       text(ctx,'Same starting point and initial velocities',640,460,21,C.muted,'center');
     },
-    modes(ctx,t,stage) {
-      if(stage)return;
+    modes(ctx,t) {
       const ch=chart(110,65,1060,330,-3.5,3.5,-1.2,1.2);
       for(const x of [-2.1,2.1])for(const r of [.4,.75,1.1]) {
         const pts=Array.from({length:101},(_,i)=>ch.map([x+r*Math.cos(i/100*tau),r*.65*Math.sin(i/100*tau)]));
@@ -226,8 +274,8 @@
         const seg=Math.min(2,Math.floor(q*3));p=G.mix(anchors[seg],anchors[seg+1],ease(q*3-seg));
       }
       text(ctx,'An unclear character',25,41,24,C.muted);
-      // A deliberately ambiguous character sketch, not a classifier input image.
-      ctx.save();ctx.translate(87,105);ctx.rotate(-.06);ctx.font='italic 115px Georgia, serif';ctx.fillStyle=C.ink;ctx.globalAlpha=.55;ctx.fillText('A',0,90);ctx.restore();
+      // The teaching example is displayed as a low-resolution image, like MNIST.
+      pixelGlyph(ctx,'A?',105,154,148,.9);
       if(stage>=1) {
         letters.forEach((letter,k)=>{
           const y=261+k*66;text(ctx,letter,28,y,29,colors[k], 'left',500);
@@ -242,8 +290,9 @@
       const tr=triangle(288,244,424),ch=chart(782,39,417,386,-3.3,3.3,-3.3,3.3);
       drawTriangle(ctx,tr);grid(ctx,ch,3);
       text(ctx,'Probability simplex',288,461,24,C.ink,'center');text(ctx,'ILR coordinates',991,461,24,C.ink,'center');
-      text(ctx,'ILR',642,209,23,C.muted,'center');
-      line(ctx,[[589,243],[694,243]],C.muted,1.5);line(ctx,[[588,243],[600,237]],C.muted);line(ctx,[[588,243],[600,249]],C.muted);line(ctx,[[694,243],[682,237]],C.muted);line(ctx,[[694,243],[682,249]],C.muted);
+      text(ctx,'ILR',642,184,25,C.muted,'center');
+      text(ctx,'φ: Δᴰ → ℝᴰ',642,224,23,C.ink,'center');
+      line(ctx,[[548,271],[736,271]],C.muted,3);line(ctx,[[548,271],[568,260]],C.muted,3);line(ctx,[[548,271],[568,282]],C.muted,3);line(ctx,[[736,271],[716,260]],C.muted,3);line(ctx,[[736,271],[716,282]],C.muted,3);
       if(stage>=2) {
         const a=frac(t,0,3);
         [.7,1.35,2,2.7].forEach(r=>{
@@ -263,7 +312,7 @@
     },
     interpolation(ctx,t,stage) {
       const tr=triangle(502,235,433);drawTriangle(ctx,tr);
-      const s=stage>=1?(stage>=2?1:frac(t,0,5)):0;
+      const s=stage>=1?frac(t,0,5):0;
       if(stage>=1)for(let k=0;k<3;k++) {
         const vertices=tr.v.map((_,j)=>G.interpolateCategory(k,[j===0?1:0,j===1?1:0,j===2?1:0]));
         polygon(ctx,vertices.map(p=>tr.map(p)),colors[k],.075*s);
@@ -277,42 +326,9 @@
         text(ctx,'The original category',978,218,24,C.muted,'center');
         text(ctx,'remains largest',978,254,24,C.muted,'center');
       }
-      if(stage>=2) {
-        const q=frac(t,0,3.5);
-        [categoryPoints[12],categoryPoints[13],categoryPoints[14]].forEach(({p,k})=>{
-          const point=tr.map(p),end=[854+k*124,355];
-          ring(ctx,point,9,colors[k],1,2);
-          const curve=u=>[point[0]+u*(end[0]-point[0]),point[1]+u*(end[1]-point[1])-Math.sin(Math.PI*u)*24];
-          arcPath(ctx,curve,q,colors[k],1.4,.35);dot(ctx,curve(q),5,colors[k],1-q*.5);
-          if(q>.85)text(ctx,letters[k],...end,43,colors[k],'center');
-        });
-      }
-    },
-    flow(ctx,t,stage) {
-      if(stage>=2)return;
-      const ch=chart(49,73,405,332,-2.5,2.5,-2.3,2.3),tr=triangle(920,241,409);
-      text(ctx,'Continuous coordinates',250,20,27,C.ink,'center');text(ctx,'Probability simplex',920,20,27,C.ink,'center');
-      grid(ctx,ch,2);drawTriangle(ctx,tr);
-      const s=stage>=1?frac(t,0,7):0;
-      flowPaths.forEach(({path,k},i)=>{
-        const a=s*(path.length-1),j=Math.min(path.length-2,Math.floor(a));
-        const latent=G.mix(path[j],path[j+1],a-j),p=G.inverseIlr(latent);
-        dot(ctx,ch.map(latent),2.8,stage?colors[k]:C.muted,.65);
-        dot(ctx,tr.map(p),2.8,stage?colors[k]:C.muted,.65);
-        if(stage&&i<9)line(ctx,path.slice(0,j+1).map(z=>ch.map(z)),colors[k],1.3,.38);
-      });
-      text(ctx,'Map back',625,220,22,C.muted,'center');
-      line(ctx,[[523,252],[729,252]],C.muted,1.4);line(ctx,[[729,252],[715,245]],C.muted);line(ctx,[[729,252],[715,259]],C.muted);
-      text(ctx,'Analytic flow illustration',250,460,21,C.muted,'center');
-      if(stage&&s>.92) letters.forEach((l,k)=>text(ctx,l,828+k*92,459,31,colors[k],'center'));
     },
     multiclass(ctx,t,stage) {
       const transition=stage?frac(t,0,.7):0;
-      const glyph=(letter,x,y,size,angle=0,alpha=1,color=C.ink)=>{
-        ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=alpha;
-        ctx.font=`italic ${size}px Georgia, serif`;ctx.fillStyle=color;
-        ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(letter,0,0);ctx.restore();
-      };
       // Training examples and labels are explicit, separate from the unseen input.
       if(transition<1) {
         ctx.save();ctx.globalAlpha=1-transition;
@@ -320,7 +336,7 @@
         text(ctx,'Character',158,91,21,C.muted,'center');text(ctx,'Label',356,91,21,C.muted,'center');
         letters.forEach((letter,k)=>{
           const y=156+k*99;
-          [-1,0,1].forEach((offset,j)=>glyph(letter,158+offset*69,y,45+j*5,offset*.12,1-transition));
+          [-1,0,1].forEach((offset,j)=>pixelGlyph(ctx,letter,158+offset*56,y,45,1,j+1));
           text(ctx,letter,356,y,30,colors[k],'center',500);
           line(ctx,[[405,y],[581,230]],C.line,1.6);
           if(!stage){const s=frac(t,k*.35,3.5);dot(ctx,G.mix([405,y],[581,230],s),5,colors[k],.85);}
@@ -338,7 +354,7 @@
       if(stage) {
         ctx.save();ctx.globalAlpha=transition;
         text(ctx,'New input',230,65,27,C.ink,'center');
-        glyph('B',230,230,100,-.1,transition);
+        pixelGlyph(ctx,'B?',230,230,132,1);
         line(ctx,[[319,230],[579,230]],C.line,1.6);
         const into=frac(t,.8,2.2),out=frac(t,3,1.8);
         line(ctx,[[319,230],[319+260*into,230]],C.orange,2.6);
@@ -378,14 +394,16 @@
       text(ctx,'Monte Carlo prediction',941,459,21,C.muted,'center');
     },
     closing(ctx,t) {
-      const ch=chart(26,74,541,316,-2.6,3.6,-2.5,2.5),tr=triangle(988,231,338);
+      const ch=chart(26,74,541,316,-2.85,3.6,-2.95,2.95),tr=triangle(988,231,338);
       bananaPlot(ctx,ch);
       const s=frac(t,0,4);
       gaussian.slice(0,170).forEach(z=>dot(ctx,ch.map(G.banana(z.map(a=>a*s))),2.4,C.teal,.45));
       drawTriangle(ctx,tr,{labels:false});
       categoryPoints.slice(0,150).forEach(({p,k})=>dot(ctx,tr.map(G.mix([1/3,1/3,1/3],p,s)),2.5,colors[k],.47));
-      text(ctx,'Target distributions',298,22,27,C.ink,'center');text(ctx,'The probability simplex',988,22,27,C.ink,'center');
-      text(ctx,'Choose the paths',298,450,24,C.teal,'center');text(ctx,'Choose the coordinates',988,450,24,C.teal,'center');
+      text(ctx,'Target distributions',298,22,27,C.teal,'center');text(ctx,'The probability simplex',988,22,27,C.orange,'center');
+      text(ctx,'Choose the paths',298,422,24,C.teal,'center');text(ctx,'Choose the coordinates',988,422,24,C.orange,'center');
+      text(ctx,'Paper I  ·  Paper II',298,462,19,C.teal,'center',500);
+      text(ctx,'Paper III  ·  Paper IV',988,462,19,C.orange,'center',500);
     },
   };
 
@@ -396,8 +414,6 @@
     if(caption) {
       const name=section.dataset.scene;
       if(name==='mountains')caption.textContent=['How do we reach the other side?','The straight line goes underground.','Geometry guides exploration.'][Math.min(stage,2)];
-      if(name==='modes')caption.textContent=stage?'More configurations explored in the tested field system':'Faster motion through low-density regions';
-      if(name==='flow')caption.textContent=stage>=2?'Samples outside the target pattern · lower is better':'Learn in continuous coordinates. Generate categories.';
       if(name==='classification')caption.textContent=stage===1?'Confidence should agree with how often predictions are correct':'Exact latent inference in the constructed Gaussian model';
     }
     return stage;

@@ -36,6 +36,48 @@
     const sum = values.reduce((a, b) => a + b, 0);
     return values.map(x => x / sum);
   }
+  function cholesky(matrix,jitter=0) {
+    const n=matrix.length,L=Array.from({length:n},()=>Array(n).fill(0));
+    for(let i=0;i<n;i++)for(let j=0;j<=i;j++) {
+      let value=matrix[i][j]+(i===j?jitter:0);
+      for(let k=0;k<j;k++)value-=L[i][k]*L[j][k];
+      if(i===j) {
+        if(value<=0||!Number.isFinite(value))throw new Error('Matrix is not positive definite');
+        L[i][j]=Math.sqrt(value);
+      } else L[i][j]=value/L[j][j];
+    }
+    return L;
+  }
+  function solveLower(L,b) {
+    const x=Array(b.length).fill(0);
+    for(let i=0;i<b.length;i++) {
+      let value=b[i];for(let j=0;j<i;j++)value-=L[i][j]*x[j];x[i]=value/L[i][i];
+    }
+    return x;
+  }
+  function solveCholesky(L,b) {
+    const y=solveLower(L,b),x=Array(b.length).fill(0);
+    for(let i=b.length-1;i>=0;i--) {
+      let value=y[i];for(let j=i+1;j<b.length;j++)value-=L[j][i]*x[j];x[i]=value/L[i][i];
+    }
+    return x;
+  }
+  function gaussianProcessPosterior(trainX,trainY,queryX,{lengthScale=1,signalVariance=1,noiseStd=.08,sampleCount=7,seed=9317}={}) {
+    if(!trainX.length||trainX.length!==trainY.length||!queryX.length||lengthScale<=0||signalVariance<=0||noiseStd<0||sampleCount<0)throw new RangeError('Invalid Gaussian process inputs');
+    const kernel=(a,b)=>signalVariance*Math.exp(-.5*((a-b)/lengthScale)**2);
+    const training=trainX.map((x,i)=>trainX.map((z,j)=>kernel(x,z)+(i===j?noiseStd**2:0)));
+    const factor=cholesky(training,1e-10),alpha=solveCholesky(factor,trainY);
+    const cross=queryX.map(x=>trainX.map(z=>kernel(x,z)));
+    const projected=cross.map(row=>solveLower(factor,row));
+    const mean=cross.map(row=>row.reduce((sum,value,i)=>sum+value*alpha[i],0));
+    const covariance=queryX.map((x,i)=>queryX.map((z,j)=>kernel(x,z)-projected[i].reduce((sum,value,k)=>sum+value*projected[j][k],0)));
+    const sampleFactor=cholesky(covariance,1e-8),random=rng(seed);
+    const samples=Array.from({length:sampleCount},()=>{
+      const white=Array.from({length:queryX.length},()=>normal(random));
+      return mean.map((value,i)=>value+sampleFactor[i].slice(0,i+1).reduce((sum,a,j)=>sum+a*white[j],0));
+    });
+    return {mean,covariance,samples};
+  }
   // A bijective banana map. Its Jacobian determinant is constant (0.48).
   // F(t*z) is an exact geodesic of the metric induced by inverse F.
   const banana = ([u, v]) => [0.45 * u * u + 0.48 * v - 1.3, u];
@@ -267,5 +309,5 @@
     }
     return points;
   }
-  scope.LectioGeometry = { H, clamp, mix, ilr, inverseIlr, aitchisonDistance, interpolateCategory, argmax, rng, normal, dirichlet, banana, inverseBanana, bananaDensity, terrain, terrainPoint, terrainSegmentLength, terrainPathLength, terrainRoute, mongeAcceleration, mongeSpeed, undergroundOpacity, inverseMetricTraversal, flowCenters, mixtureVelocity, mixtureFlow };
+  scope.LectioGeometry = { H, clamp, mix, ilr, inverseIlr, aitchisonDistance, interpolateCategory, argmax, rng, normal, dirichlet, gaussianProcessPosterior, banana, inverseBanana, bananaDensity, terrain, terrainPoint, terrainSegmentLength, terrainPathLength, terrainRoute, mongeAcceleration, mongeSpeed, undergroundOpacity, inverseMetricTraversal, flowCenters, mixtureVelocity, mixtureFlow };
 })(typeof window === 'undefined' ? globalThis : window);
