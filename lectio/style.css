@@ -47,18 +47,31 @@ body { margin:0; background:var(--paper); color:var(--ink); }
 .figure-pair { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-top:30px; }
 .reveal figcaption { font-size:25px; font-weight:400; margin-bottom:17px; }
 .reveal figure img { display:block; margin:0; width:100%; height:420px; object-fit:contain; border:none; background:transparent; mix-blend-mode:multiply; }
-.discrete-examples { position:absolute; left:64px; right:64px; top:170px; height:414px; display:grid; grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr); gap:58px; align-items:start; }
+.generation-map { position:absolute; left:330px; top:105px; width:620px; text-align:center; }
+.generation-map p { color:var(--muted); font-size:19px; line-height:1.2; }
+.generation-map p span { padding:0 12px; color:var(--orange); }
+.reveal .generation-map img { display:block; width:620px; height:349px; margin:5px 0 0; object-fit:contain; border:none; box-shadow:none; mix-blend-mode:multiply; }
+.generation-examples { position:absolute; left:64px; right:64px; top:475px; height:130px; display:grid; grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr); gap:48px; align-items:start; }
 .discrete-example { min-width:0; }
 .example-divider { width:1px; height:100%; background:var(--line); }
-.example-heading { font-size:31px; font-weight:500; line-height:1.15; }
-.example-kicker { margin-top:7px!important; color:var(--muted); font-size:18px; letter-spacing:.4px; }
-.dna-stream { margin-top:38px; font:500 28px/1.62 "Adwaita Mono","SFMono-Regular",Consolas,monospace; letter-spacing:5px; white-space:nowrap; }
+.example-heading { font-size:25px; font-weight:500; line-height:1.15; }
+.example-heading span { margin-left:12px; color:var(--muted); font-size:16px; font-weight:400; letter-spacing:.3px; }
+.dna-stream { margin-top:14px; font:500 20px/1.45 "Adwaita Mono","SFMono-Regular",Consolas,monospace; letter-spacing:3.4px; white-space:nowrap; }
 .base-a { color:#b55449; }
 .base-c { color:var(--blue); }
 .base-g { color:var(--teal); }
 .base-t { color:var(--orange); }
-.language-stream { max-width:545px; margin-top:36px!important; font-size:24px; line-height:1.48; color:var(--ink); }
-.example-alphabet { margin-top:30px!important; color:var(--muted); font-size:20px; letter-spacing:.7px; }
+.language-stream { max-width:545px; margin-top:14px!important; font-size:19px; line-height:1.35; color:var(--ink); }
+.example-alphabet { margin-top:10px!important; color:var(--muted); font-size:16px; letter-spacing:.6px; }
+.closing-papers { position:absolute; left:64px; right:64px; top:510px; display:grid; grid-template-columns:1fr 1fr; gap:104px; }
+.closing-paper-column { min-width:0; }
+.closing-paper { margin-bottom:19px; font-size:17px; line-height:1.24; }
+.closing-paper-meta { margin-bottom:2px!important; font-size:17px; font-weight:500; }
+.closing-paper cite { display:block; color:var(--ink); font-size:17px; font-style:italic; }
+.closing-paper ul { margin:6px 0 0 20px; padding:0; color:var(--ink); font-size:18px; line-height:1.22; }
+.closing-paper li { padding-left:2px; }
+.inference-papers .closing-paper-meta,.inference-papers .closing-paper li::marker { color:var(--teal); }
+.discrete-papers .closing-paper-meta,.discrete-papers .closing-paper li::marker { color:var(--orange); }
 .reveal .progress { color:var(--teal); height:3px; }
 .reveal .controls { color:var(--teal); right:12px; bottom:13px; font-size:8px; }
 .reveal .slide-number { font-family:inherit; color:var(--muted); background:none; font-size:14px; right:30px; bottom:9px; }

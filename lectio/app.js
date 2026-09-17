@@ -22,6 +22,13 @@
   let paused = false, active = null, elapsed = 0, previousTime = 0, request = 0;
   const random = G.rng(830412);
   const gaussian = Array.from({length:480}, () => [G.normal(random), G.normal(random)]);
+  const targetSamples = gaussian.map(G.banana);
+  const integrationRegion = Array.from({length:181},(_,i)=>{
+    const angle=tau*i/180;
+    return [.3+1.65*Math.cos(angle)+.35*Math.sin(angle)+.18*Math.cos(2*angle),
+      -.82+.92*Math.sin(angle)-.18*Math.cos(angle)-.1*Math.cos(2*angle)];
+  });
+  const integrationCount=targetSamples.filter(point=>G.pointInPolygon(point,integrationRegion)).length;
   const categoryPoints = Array.from({length:240}, (_, i) => {
     const k = i % 3;
     const p = G.interpolateCategory(k, G.dirichlet(random), 0.5);
@@ -30,7 +37,8 @@
   const learningInputs=[-2.2,-1.65,-1.1,-.5,.05,.6,1.15];
   const learningTargets=[-.56,-.82,-.64,-.3,.08,.4,.63];
   const learningGrid=Array.from({length:141},(_,i)=>-2.5+6*i/140);
-  const learningGp=G.gaussianProcessPosterior(learningInputs,learningTargets,learningGrid,{lengthScale:1.05,signalVariance:.95,noiseStd:.1,sampleCount:7,seed:20260918});
+  const learningGp=G.gaussianProcessPosterior(learningInputs,learningTargets,learningGrid,{lengthScale:1.05,signalVariance:.95,noiseStd:.1,sampleCount:10,seed:20260918});
+  const learningDrawPairs=Array.from({length:5},(_,i)=>[learningGp.samples[2*i],learningGp.samples[2*i+1]]);
   const inverseTraversal = G.inverseMetricTraversal();
   const mountainAlpha = .2;
   const mountainRoute = G.terrainRoute({alpha:mountainAlpha});
@@ -166,18 +174,18 @@
       const left=chart(28,100,552,264,-2.5,3.5,-2.7,2.7);
 
       text(ctx,'Bayesian Inference',28,20,29,C.teal,'left',500);
-      text(ctx,'Which models remain plausible?',28,58,21,C.muted);
+      text(ctx,'Draws from a posterior distribution',28,58,21,C.muted);
       line(ctx,[[640,13],[640,466]],C.line,1.4,.9);
 
       line(ctx,[left.map([-2.5,0]),left.map([3.5,0])],C.line,1.1,.7);
       line(ctx,[left.map([0,-2.7]),left.map([0,2.7])],C.line,1.1,.7);
       ctx.save();ctx.beginPath();ctx.rect(left.x,left.y,left.w,left.h);ctx.clip();
       const posteriorAlpha=stage>=2?.4:stage>=1?.4*frac(t,0,.6):0;
-      if(posteriorAlpha>0)learningGp.samples.forEach(sample=>line(
-          ctx,
-          learningGrid.map((x,i)=>left.map([x,sample[i]])),
-          C.blue,1.8,posteriorAlpha
-        ));
+      const drawAngle=stage>=2?.9:t*.55;
+      if(posteriorAlpha>0)learningDrawPairs.forEach(([a,b],i)=>{
+        const sample=G.rotateGaussianDraw(learningGp.mean,a,b,drawAngle+i*.7);
+        line(ctx,learningGrid.map((x,j)=>left.map([x,sample[j]])),C.blue,1.8,posteriorAlpha);
+      });
       line(ctx,learningGrid.map((x,i)=>left.map([x,learningGp.mean[i]])),C.orange,3.2,.96);
       learningInputs.forEach((x,i)=>{
         const p=left.map([x,learningTargets[i]]);
@@ -185,10 +193,11 @@
       });
       ctx.restore();
       legend(ctx,'Posterior mean',67,400,C.orange);
-      if(stage>=1)legend(ctx,'Posterior predictions',316,400,C.blue);
+      if(stage>=1)legend(ctx,'Posterior draws',316,400,C.blue);
       text(ctx,stage>=1?'A distribution over possible models':'One fitted model',304,455,20,stage>=1?C.teal:C.orange,'center');
     },
     mountains(ctx,t,stage) {
+      t*=2;
       drawMountainTerrain(ctx);
       const start=mountainProject(mountainRoute.at(0)),end=mountainProject(mountainRoute.at(1));
       const tunnelProgress=stage>=2?1:G.clamp((t-.4)/6);
@@ -209,7 +218,7 @@
         const route=u=>mountainProject(mountainRoute.at(u));
         arcPath(ctx,route,progress,C.paper,11,.95);
         arcPath(ctx,route,progress,C.teal,5.5);
-        text(ctx,`Monge geodesic  ·  α = ${mountainAlpha}`,1200,31,26,C.teal,'right');
+        text(ctx,'Geodesic',1200,31,26,C.teal,'right');
       }
       dot(ctx,start,5,C.teal);ring(ctx,start,10,C.teal,.3,2);
       dot(ctx,end,5,C.teal);ring(ctx,end,10,C.teal,.3,2);
@@ -223,10 +232,19 @@
       const ch=chart(342,17,750,422,-2.85,4,-2.95,2.95);
       bananaPlot(ctx,ch);
       if(stage>=1) {
-        const n=Math.floor(gaussian.length*frac(t,0,5));
-        gaussian.slice(0,n).forEach(z=>dot(ctx,ch.map(G.banana(z)),3.3,C.teal,.6));
+        const n=stage>=2?targetSamples.length:Math.floor(targetSamples.length*frac(t,0,5));
+        targetSamples.slice(0,n).forEach(point=>dot(ctx,ch.map(point),3.3,C.teal,stage>=2?.2:.6));
         text(ctx,'Samples',34,255,29,C.teal);
         text(ctx,'represent uncertainty',34,291,23,C.muted);
+        if(stage>=2) {
+          const reveal=frac(t,0,.7),screenRegion=integrationRegion.map(ch.map);
+          polygon(ctx,screenRegion,C.orange,.055*reveal);
+          targetSamples.filter(point=>G.pointInPolygon(point,integrationRegion))
+            .forEach(point=>dot(ctx,ch.map(point),4,C.orange,.85*reveal));
+          line(ctx,[...screenRegion,screenRegion[0]],C.orange,4,reveal);
+          text(ctx,'What proportion of pines are in the bounded region?',717,451,27,C.teal,'center',600);
+          text(ctx,`${integrationCount} / ${targetSamples.length} samples  ≈  ${Math.round(100*integrationCount/targetSamples.length)}%`,717,481,20,C.muted,'center',500);
+        }
       } else {
         dot(ctx,ch.map(G.banana([0,0])),8,C.orange);
         text(ctx,'One estimate',34,255,29,C.orange);
@@ -234,6 +252,7 @@
       text(ctx,'Target distribution',1120,27,22,C.muted,'right');
     },
     geodesics(ctx,t,stage) {
+      t*=2;
       const left=chart(8,70,566,346,-2.85,3.6,-2.95,2.95),right=chart(701,70,566,346,-2.85,3.6,-2.95,2.95);
       text(ctx,'Straight paths',left.x,22,27,C.orange);text(ctx,'Geodesic paths',right.x,22,27,C.teal);
       bananaPlot(ctx,left,true);bananaPlot(ctx,right,true,stage?1:.35);
@@ -249,6 +268,7 @@
       text(ctx,'Same starting point and initial velocities',640,460,21,C.muted,'center');
     },
     modes(ctx,t) {
+      t*=2;
       const ch=chart(110,65,1060,330,-3.5,3.5,-1.2,1.2);
       for(const x of [-2.1,2.1])for(const r of [.4,.75,1.1]) {
         const pts=Array.from({length:101},(_,i)=>ch.map([x+r*Math.cos(i/100*tau),r*.65*Math.sin(i/100*tau)]));
@@ -287,6 +307,7 @@
       } else {text(ctx,'A     B     C',28,302,32,C.ink);}
     },
     ilr(ctx,t,stage) {
+      t*=2;
       const tr=triangle(288,244,424),ch=chart(782,39,417,386,-3.3,3.3,-3.3,3.3);
       drawTriangle(ctx,tr);grid(ctx,ch,3);
       text(ctx,'Probability simplex',288,461,24,C.ink,'center');text(ctx,'ILR coordinates',991,461,24,C.ink,'center');
@@ -311,6 +332,7 @@
       const z=G.mix(a,b,progress);dot(ctx,ch.map(z),8,C.orange);dot(ctx,tr.map(G.inverseIlr(z)),8,C.orange);
     },
     interpolation(ctx,t,stage) {
+      t*=2;
       const tr=triangle(502,235,433);drawTriangle(ctx,tr);
       const s=stage>=1?frac(t,0,5):0;
       if(stage>=1)for(let k=0;k<3;k++) {
@@ -328,6 +350,7 @@
       }
     },
     multiclass(ctx,t,stage) {
+      t*=2;
       const transition=stage?frac(t,0,.7):0;
       // Training examples and labels are explicit, separate from the unseen input.
       if(transition<1) {
@@ -394,16 +417,14 @@
       text(ctx,'Monte Carlo prediction',941,459,21,C.muted,'center');
     },
     closing(ctx,t) {
-      const ch=chart(26,74,541,316,-2.85,3.6,-2.95,2.95),tr=triangle(988,231,338);
+      const ch=chart(48,42,500,225,-2.85,3.6,-2.95,2.95),tr=triangle(988,156,250);
       bananaPlot(ctx,ch);
       const s=frac(t,0,4);
       gaussian.slice(0,170).forEach(z=>dot(ctx,ch.map(G.banana(z.map(a=>a*s))),2.4,C.teal,.45));
       drawTriangle(ctx,tr,{labels:false});
       categoryPoints.slice(0,150).forEach(({p,k})=>dot(ctx,tr.map(G.mix([1/3,1/3,1/3],p,s)),2.5,colors[k],.47));
-      text(ctx,'Target distributions',298,22,27,C.teal,'center');text(ctx,'The probability simplex',988,22,27,C.orange,'center');
-      text(ctx,'Choose the paths',298,422,24,C.teal,'center');text(ctx,'Choose the coordinates',988,422,24,C.orange,'center');
-      text(ctx,'Paper I  ·  Paper II',298,462,19,C.teal,'center',500);
-      text(ctx,'Paper III  ·  Paper IV',988,462,19,C.orange,'center',500);
+      text(ctx,'Bayesian inference',298,17,28,C.teal,'center',500);text(ctx,'Modeling discrete data',988,17,28,C.orange,'center',500);
+      text(ctx,'Choose the paths',298,326,23,C.teal,'center');text(ctx,'Choose the coordinates',988,326,23,C.orange,'center');
     },
   };
 
@@ -413,7 +434,7 @@
     const caption=section.querySelector('.stage-caption');
     if(caption) {
       const name=section.dataset.scene;
-      if(name==='mountains')caption.textContent=['How do we reach the other side?','The straight line goes underground.','Geometry guides exploration.'][Math.min(stage,2)];
+      if(name==='mountains')caption.textContent=['How do we reach the other side?','The straight line ignores the topography.','Geometry follows the landscape topology'][Math.min(stage,2)];
       if(name==='classification')caption.textContent=stage===1?'Confidence should agree with how often predictions are correct':'Exact latent inference in the constructed Gaussian model';
     }
     return stage;
@@ -429,13 +450,17 @@
     if(!active||paused||reduced||printMode||document.hidden||Reveal.isOverview()||Reveal.isPaused()) {previousTime=0;return;}
     if(previousTime)elapsed+=(now-previousTime)/1000;previousTime=now;
     render(active,elapsed);
-    if(elapsed<12)request=requestAnimationFrame(tick);
+    const learningWiggles=active.dataset.scene==='learning'&&stageOf(active)===1;
+    if(elapsed<12||learningWiggles)request=requestAnimationFrame(tick);
   }
   function restart() {
     cancelAnimationFrame(request);request=0;previousTime=0;elapsed=0;
     if(active){render(active,(reduced||printMode)?12:0);if(!paused&&!reduced&&!printMode)request=requestAnimationFrame(tick);}
   }
-  function resume() { previousTime=0;if(!request&&!paused&&!reduced&&!printMode&&elapsed<12)request=requestAnimationFrame(tick); }
+  function resume() {
+    const learningWiggles=active?.dataset.scene==='learning'&&stageOf(active)===1;
+    previousTime=0;if(!request&&!paused&&!reduced&&!printMode&&(elapsed<12||learningWiggles))request=requestAnimationFrame(tick);
+  }
   function setSlide(event) {active=event.currentSlide;restart();}
   function toggleMotion() {
     if(reduced){reduced=false;paused=false;restart();}

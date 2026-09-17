@@ -78,6 +78,11 @@
     });
     return {mean,covariance,samples};
   }
+  function rotateGaussianDraw(mean,a,b,angle) {
+    if(mean.length!==a.length||mean.length!==b.length)throw new RangeError('Gaussian draw dimensions must agree');
+    const c=Math.cos(angle),s=Math.sin(angle);
+    return mean.map((value,i)=>value+c*(a[i]-value)+s*(b[i]-value));
+  }
   // A bijective banana map. Its Jacobian determinant is constant (0.48).
   // F(t*z) is an exact geodesic of the metric induced by inverse F.
   const banana = ([u, v]) => [0.45 * u * u + 0.48 * v - 1.3, u];
@@ -269,6 +274,15 @@
     const fraction=clamp(depth/.18),fade=fraction*fraction*(3-2*fraction);
     return 1-.78*fade;
   }
+  function pointInPolygon(point, polygon) {
+    let inside=false;
+    for(let i=0,j=polygon.length-1;i<polygon.length;j=i++) {
+      const [xi,yi]=polygon[i],[xj,yj]=polygon[j];
+      const crosses=(yi>point[1])!==(yj>point[1]);
+      if(crosses&&point[0]<(xj-xi)*(point[1]-yi)/(yj-yi)+xi)inside=!inside;
+    }
+    return inside;
+  }
   function inverseMetricTraversal(count = 500) {
     // Symmetric 2-D Gaussian mixture restricted to y=0: the symmetry axis
     // is an actual geodesic. G_inv = ((p+lambda)/(p0+lambda))^2 I.
@@ -309,5 +323,5 @@
     }
     return points;
   }
-  scope.LectioGeometry = { H, clamp, mix, ilr, inverseIlr, aitchisonDistance, interpolateCategory, argmax, rng, normal, dirichlet, gaussianProcessPosterior, banana, inverseBanana, bananaDensity, terrain, terrainPoint, terrainSegmentLength, terrainPathLength, terrainRoute, mongeAcceleration, mongeSpeed, undergroundOpacity, inverseMetricTraversal, flowCenters, mixtureVelocity, mixtureFlow };
+  scope.LectioGeometry = { H, clamp, mix, ilr, inverseIlr, aitchisonDistance, interpolateCategory, argmax, rng, normal, dirichlet, gaussianProcessPosterior, rotateGaussianDraw, banana, inverseBanana, bananaDensity, terrain, terrainPoint, terrainSegmentLength, terrainPathLength, terrainRoute, mongeAcceleration, mongeSpeed, undergroundOpacity, pointInPolygon, inverseMetricTraversal, flowCenters, mixtureVelocity, mixtureFlow };
 })(typeof window === 'undefined' ? globalThis : window);
