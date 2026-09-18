@@ -388,6 +388,7 @@
       }
     },
     classification(ctx,t,stage) {
+      t*=2;
       if(stage===1) {
         text(ctx,'80% confidence',640,55,41,C.ink,'center',500);
         const n=Math.floor(frac(t,.2,4)*10);
@@ -413,7 +414,9 @@
         dot(ctx,ch.map(z),3,C.teal,.3);dot(ctx,tr.map(p),3,C.teal,.3);
       });
       if(count){const mean=probabilities.reduce((sum,p)=>sum.map((x,i)=>x+p[i]/count),[0,0,0]);dot(ctx,tr.map(mean),7,C.orange);}
-      text(ctx,'Map and average',638,211,22,C.muted,'center');line(ctx,[[527,247],[747,247]],C.muted,1.4);line(ctx,[[747,247],[733,240]],C.muted);line(ctx,[[747,247],[733,254]],C.muted);
+      text(ctx,'Map and average',638,211,22,C.muted,'center');
+      text(ctx,'φ',638,247,24,C.ink,'center',500);
+      line(ctx,[[527,282],[747,282]],C.muted,1.4);line(ctx,[[747,282],[733,275]],C.muted);line(ctx,[[747,282],[733,289]],C.muted);
       text(ctx,'Monte Carlo prediction',941,459,21,C.muted,'center');
     },
     closing(ctx,t) {
