@@ -1,0 +1,1 @@
+(()=>{"use strict";for(const t of document.querySelectorAll(".tex")){const r=t.textContent.trim();try{window.katex.render(r,t,{displayMode:"true"===t.dataset.display,output:"htmlAndMathml",throwOnError:!0,trust:!1})}catch(r){t.dataset.mathError="true"}}})();
