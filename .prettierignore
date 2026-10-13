@@ -14,3 +14,4 @@ _scripts/*
 _data/citations.yml
 # Built standalone slide deck; update using .github/scripts/sync-lectio.mjs.
 lectio/**
+seminar/**

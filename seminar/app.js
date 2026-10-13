@@ -1,0 +1,614 @@
+/* Animated mathematical explanations. See README.md for construction details. */
+(() => {
+  'use strict';
+  const G = window.LectioGeometry;
+  const C = { paper:'#faf9f6', ink:'#20333c', muted:'#687c80', line:'#d4deda', teal:'#197f7b', orange:'#cf704c', blue:'#597bb8', pale:'#e5efea' };
+  const colors = [C.teal, C.orange, C.blue];
+  const letters = ['A', 'B', 'C'];
+  const pixelGlyphs = {
+    A:['000111000','001101100','011000110','110000011','110000011','111111111','110000011','110000011','110000011','000000000'],
+    B:['111111000','110000110','110000110','111111000','110000110','110000011','110000110','111111000','000000000','000000000'],
+    C:['001111100','011000110','110000000','110000000','110000000','110000000','110000000','011000110','001111100','000000000'],
+    'A?':['000111000','002101200','011000110','110000011','110000001','111101111','110000011','010000011','110000010','000010000'],
+    'B?':['111111000','110000110','110000010','111111000','110000110','110000010','110000110','111101000','000001000','000000000'],
+  };
+  const tau = 2 * Math.PI;
+  const ease = t => { t = G.clamp(t); return t * t * (3 - 2 * t); };
+  const frac = (seconds, start, duration) => ease((seconds - start) / duration);
+  const printMode = /print-pdf/i.test(location.search);
+  const stillMode = new URLSearchParams(location.search).has('static');
+  const media = matchMedia('(prefers-reduced-motion: reduce)');
+  let reduced = media.matches || stillMode;
+  let paused = false, active = null, elapsed = 0, previousTime = 0, request = 0;
+  const random = G.rng(830412);
+  const gaussian = Array.from({length:480}, () => [G.normal(random), G.normal(random)]);
+  const targetSamples = gaussian.map(G.banana);
+  const integrationRegion = Array.from({length:181},(_,i)=>{
+    const angle=tau*i/180;
+    return [.3+1.65*Math.cos(angle)+.35*Math.sin(angle)+.18*Math.cos(2*angle),
+      -.82+.92*Math.sin(angle)-.18*Math.cos(angle)-.1*Math.cos(2*angle)];
+  });
+  const integrationCount=targetSamples.filter(point=>G.pointInPolygon(point,integrationRegion)).length;
+  const categoryPoints = Array.from({length:240}, (_, i) => {
+    const k = i % 3;
+    const p = G.interpolateCategory(k, G.dirichlet(random), 0.5);
+    return { k, p, z:G.ilr(p), base:[G.normal(random) * 0.52, G.normal(random) * 0.52] };
+  });
+  const gaussianNoiseRandom = G.rng(461027);
+  const gaussianInterpolationPoints = Array.from({length:210}, (_,i)=>({
+    k:i%3, noise:[G.normal(gaussianNoiseRandom),G.normal(gaussianNoiseRandom)],
+  }));
+  const gaussianInterpolationCenters = [0,1,2].map(k=>{
+    const p=[0,1,2].map(j=>(j===k?.55:0)+.45/3);
+    return {p,z:G.ilr(p)};
+  });
+  const learningInputs=[-2.2,-1.65,-1.1,-.5,.05,.6,1.15];
+  const learningTargets=[-.56,-.82,-.64,-.3,.08,.4,.63];
+  const learningGrid=Array.from({length:141},(_,i)=>-2.5+6*i/140);
+  const learningGp=G.gaussianProcessPosterior(learningInputs,learningTargets,learningGrid,{lengthScale:1.05,signalVariance:.95,noiseStd:.1,sampleCount:10,seed:20260918});
+  const learningDrawPairs=Array.from({length:5},(_,i)=>[learningGp.samples[2*i],learningGp.samples[2*i+1]]);
+  const inverseTraversal = G.inverseMetricTraversal();
+  const sliceDensity=x=>.13+.9*Math.exp(-.5*((x+1.4)/.55)**2)+.62*Math.exp(-.5*((x-1.6)/.6)**2);
+  const sliceLevel=.45, sliceCurrent=-1.4, sliceWidth=.52, sliceRandom=G.rng(10);
+  const sliceSteps=G.sliceStepOut({density:sliceDensity,current:sliceCurrent,level:sliceLevel,width:sliceWidth,random:sliceRandom});
+  // A fixed random stream makes the first uniform proposal miss the slice and
+  // the next one land inside it, so the teaching sequence is reproducible.
+  const sliceRejected=sliceSteps.bracket[0]+sliceRandom()*(sliceSteps.bracket[1]-sliceSteps.bracket[0]);
+  const sliceShrunk=[sliceSteps.bracket[0],sliceRejected];
+  const sliceAccepted=sliceShrunk[0]+sliceRandom()*(sliceShrunk[1]-sliceShrunk[0]);
+  function sliceLevelSegments(density,level,lo,hi) {
+    const segments=[];let start=null,previous=lo,previousValue=density(lo)-level;
+    for(let i=1;i<=800;i++) {
+      const x=lo+(hi-lo)*i/800,value=density(x)-level;
+      if((previousValue>0)!==(value>0)) {
+        const crossing=previous+(x-previous)*(-previousValue)/(value-previousValue);
+        if(value>0)start=crossing;else {segments.push([start,crossing]);start=null;}
+      }
+      previous=x;previousValue=value;
+    }
+    if(start!==null)segments.push([start,hi]);
+    return segments;
+  }
+  const sliceTrueSegments=sliceLevelSegments(sliceDensity,sliceLevel,-3.3,3.3);
+  function stepOutPosition(stops,time,start) {
+    const duration=.95,gap=.3;let value=stops[0];
+    for(let i=1;i<stops.length;i++) {
+      const at=start+(i-1)*(duration+gap);
+      if(time<at)return value;
+      if(time<at+duration)return value+(stops[i]-value)*ease((time-at)/duration);
+      value=stops[i];
+    }
+    return value;
+  }
+  const mountainAlpha = .2;
+  const mountainRoute = G.terrainRoute({alpha:mountainAlpha});
+  const sections = [...document.querySelectorAll('.slides > section')];
+
+  function text(ctx, value, x, y, size=24, color=C.ink, align='left', weight=400) {
+    ctx.save(); ctx.font = `${weight} ${size}px "Adwaita Sans", "Helvetica Neue", Arial, sans-serif`; ctx.fillStyle=color; ctx.textAlign=align; ctx.textBaseline='middle'; ctx.fillText(value,x,y); ctx.restore();
+  }
+  function line(ctx, points, color=C.line, width=1.5, alpha=1, dash=[]) {
+    if (!points.length) return;
+    ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.lineWidth=width; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.setLineDash(dash); ctx.beginPath();
+    points.forEach((p,i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p)); ctx.stroke(); ctx.restore();
+  }
+  function dot(ctx, p, radius=4, color=C.teal, alpha=1) {
+    ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle=color; ctx.beginPath(); ctx.arc(p[0],p[1],radius,0,tau); ctx.fill(); ctx.restore();
+  }
+  function ring(ctx, p, radius, color=C.teal, alpha=1, width=1.4) {
+    ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.lineWidth=width; ctx.beginPath(); ctx.arc(...p,radius,0,tau); ctx.stroke(); ctx.restore();
+  }
+  function polygon(ctx, pts, fill, alpha=1) {
+    ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle=fill; ctx.beginPath(); pts.forEach((p,i) => i ? ctx.lineTo(...p):ctx.moveTo(...p)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function pixelGlyph(ctx,key,x,y,size,alpha=1,variant=0) {
+    const pixels=pixelGlyphs[key] ?? pixelGlyphs.A, rows=pixels.length, cols=pixels[0].length;
+    const left=Math.round(x-size/2),top=Math.round(y-size/2),frame=Math.max(3,Math.round(size*.055));
+    const inner=size-2*frame,cell=Math.floor(Math.min(inner/cols,inner/rows));
+    const gx=left+Math.round((size-cell*cols)/2),gy=top+Math.round((size-cell*rows)/2);
+    ctx.save();ctx.globalAlpha*=alpha;ctx.imageSmoothingEnabled=false;
+    ctx.fillStyle=C.paper;ctx.fillRect(left,top,size,size);
+    ctx.strokeStyle=C.line;ctx.lineWidth=size>=80?3:1.5;ctx.strokeRect(left+.5,top+.5,size-1,size-1);
+    ctx.fillStyle='#18272e';ctx.fillRect(left+frame,top+frame,size-2*frame,size-2*frame);
+    pixels.forEach((row,r)=>[...row].forEach((value,c)=>{
+      if(value==='0'||(variant&&(r*7+c*13+variant)%37===0))return;
+      ctx.fillStyle=value==='2'?'#8fa19f':'#edf1ed';
+      ctx.fillRect(gx+c*cell,gy+r*cell,cell,cell);
+    }));
+    ctx.restore();
+  }
+  function chart(x,y,w,h,xmin=-3,xmax=3,ymin=-3,ymax=3) {
+    return {x,y,w,h, map:p=>[x+(p[0]-xmin)/(xmax-xmin)*w, y+h-(p[1]-ymin)/(ymax-ymin)*h]};
+  }
+  function grid(ctx,ch,range=3) {
+    for(let a=-range;a<=range;a++) {
+      line(ctx,[ch.map([a,-range]),ch.map([a,range])],C.line,1,a===0?.8:.45);
+      line(ctx,[ch.map([-range,a]),ch.map([range,a])],C.line,1,a===0?.8:.45);
+    }
+  }
+  function triangle(cx,cy,side) {
+    const height=side*Math.sqrt(3)/2;
+    const v=[[cx,cy-height/2],[cx-side/2,cy+height/2],[cx+side/2,cy+height/2]];
+    return {v,cx,cy,side, map:p=>[p.reduce((s,a,i)=>s+a*v[i][0],0),p.reduce((s,a,i)=>s+a*v[i][1],0)]};
+  }
+  function drawTriangle(ctx,tr,{labels=true,gridLines=false,alpha=1}={}) {
+    if(gridLines) for(let k=0;k<3;k++) for(let t=.2;t<1;t+=.2) {
+      const p=[0,0,0],q=[0,0,0]; p[k]=t;q[k]=t;p[(k+1)%3]=1-t;q[(k+2)%3]=1-t;
+      line(ctx,[tr.map(p),tr.map(q)],C.line,1,.55*alpha);
+    }
+    line(ctx,[...tr.v,tr.v[0]],C.ink,1.8,alpha);
+    if(labels) {
+      text(ctx,'A',tr.v[0][0],tr.v[0][1]-23,25,colors[0],'center',500);
+      text(ctx,'B',tr.v[1][0]-22,tr.v[1][1]+11,25,colors[1],'center',500);
+      text(ctx,'C',tr.v[2][0]+22,tr.v[2][1]+11,25,colors[2],'center',500);
+    }
+  }
+  function contour(ctx,ch,r,color=C.teal,alpha=.2) {
+    const pts=Array.from({length:201},(_,i)=>ch.map(G.banana([r*Math.cos(i/200*tau),r*Math.sin(i/200*tau)])));
+    line(ctx,pts,color,1.6,alpha);
+  }
+  function bananaPlot(ctx,ch,cloud=false,alpha=1) {
+    ctx.save(); ctx.beginPath();ctx.rect(ch.x,ch.y,ch.w,ch.h);ctx.clip();
+    if(cloud) gaussian.forEach(z=>dot(ctx,ch.map(G.banana(z)),2.5,C.teal,.14*alpha));
+    [.55,1.1,1.65,2.2,2.75].forEach(r=>contour(ctx,ch,r,C.teal,.46*alpha));
+    ctx.restore();
+  }
+  function arcPath(ctx,fn,t,color,width=3,alpha=1) {
+    const n=Math.max(2,Math.ceil(t*150)); line(ctx,Array.from({length:n},(_,i)=>fn(t*i/(n-1))),color,width,alpha);
+  }
+  function legend(ctx,label,x,y,color) { dot(ctx,[x,y],4,color); text(ctx,label,x+14,y,21,C.muted); }
+
+  const mountainProject=([x,y,z])=>[640+106*x+31*y,274-68*y-68*z];
+  let mountainBackdrop;
+  function drawMountainTerrain(ctx) {
+    if(!mountainBackdrop) {
+      mountainBackdrop=document.createElement('canvas');mountainBackdrop.width=1280;mountainBackdrop.height=490;
+      const paint=mountainBackdrop.getContext('2d'),faces=[],nx=90,ny=52;
+      for(let i=0;i<nx;i++)for(let j=0;j<ny;j++) {
+        const x=-4.5+i*.1,y=-2.6+j*.1,g=G.terrain(x+.05,y+.05);
+        const light=(-.5*-g.dx-.7*-g.dy+1)/Math.hypot(g.dx,g.dy,1)/Math.hypot(.5,.7,1);
+        const tone=G.clamp(g.height/3),shade=.78+.26*Math.max(0,light);
+        const base=tone<.48?G.mix([216,229,215],[153,179,159],tone/.48):G.mix([153,179,159],[243,240,225],(tone-.48)/.52);
+        const color=`rgb(${base.map(v=>Math.round(v*shade)).join(',')})`;
+        const points=[[x,y],[x+.1,y],[x+.1,y+.1],[x,y+.1]].map(p=>mountainProject(G.terrainPoint(p)));
+        faces.push({depth:y-.292*x,points,color,grid:i%4===0||j%4===0});
+      }
+      faces.sort((a,b)=>b.depth-a.depth);
+      for(const face of faces) {
+        polygon(paint,face.points,face.color);
+        line(paint,[...face.points,face.points[0]],face.color,.8);
+        if(face.grid)line(paint,face.points.slice(0,2),C.teal,.55,.13);
+      }
+      const edge=[[-4.5,2.6],[-4.5,-2.6],[4.5,-2.6],[4.5,2.6]];
+      for(let i=0;i<3;i++)line(paint,Array.from({length:101},(_,j)=>mountainProject(G.terrainPoint(G.mix(edge[i],edge[i+1],j/100)))),C.teal,1,.23);
+    }
+    ctx.drawImage(mountainBackdrop,0,0);
+  }
+  function traveller(ctx,p,t,moving,opacity=1) {
+    // The same walker follows either the 3D chord or the lifted Monge geodesic.
+    const stride=moving?Math.sin(t*9)*3:2;
+    ctx.save();ctx.translate(...p);
+    line(ctx,[[-stride,0],[0,-10],[stride,0]],C.paper,6,opacity);
+    line(ctx,[[-stride,0],[0,-10],[stride,0]],C.ink,2.7,opacity);
+    line(ctx,[[0,-10],[0,-21]],C.paper,7,opacity);
+    line(ctx,[[0,-10],[0,-21]],C.ink,3.3,opacity);
+    line(ctx,[[0,-19],[6,-13],[9,-17]],C.ink,2.5,opacity);
+    line(ctx,[[10,-17],[12,0]],C.muted,1.7,opacity);
+    dot(ctx,[-4,-17],4.6,C.orange,opacity);
+    dot(ctx,[0,-27],5.4,C.paper,opacity);dot(ctx,[0,-27],3.8,C.ink,opacity);
+    ctx.restore();
+  }
+
+  const scenes = {
+    title(ctx,t) {
+      const b=chart(36,0,566,280,-2.85,4,-2.95,2.95);
+      bananaPlot(ctx,b);
+      const progress=frac(t,.2,4);
+      gaussian.slice(0,170).forEach((z,i)=>{
+        const p=G.banana(z.map(a=>a*progress)); dot(ctx,b.map(p),2.3,C.teal,.26+(i%5)*.03);
+      });
+      const tr=triangle(326,452,327); drawTriangle(ctx,tr,{labels:false});
+      categoryPoints.slice(0,150).forEach(({p,k})=>dot(ctx,tr.map(G.mix([1/3,1/3,1/3],p,progress)),2.4,colors[k],.48));
+    },
+    learning(ctx,t,stage) {
+      const left=chart(28,100,552,264,-2.5,3.5,-2.7,2.7);
+
+      text(ctx,'Bayesian Inference',28,20,29,C.teal,'left',500);
+      text(ctx,'Draws from a posterior distribution',28,58,21,C.muted);
+      line(ctx,[[640,13],[640,466]],C.line,1.4,.9);
+
+      line(ctx,[left.map([-2.5,0]),left.map([3.5,0])],C.line,1.1,.7);
+      line(ctx,[left.map([0,-2.7]),left.map([0,2.7])],C.line,1.1,.7);
+      ctx.save();ctx.beginPath();ctx.rect(left.x,left.y,left.w,left.h);ctx.clip();
+      const posteriorAlpha=stage>=2?.4:stage>=1?.4*frac(t,0,.6):0;
+      const drawAngle=stage>=2?.9:t*.55;
+      if(posteriorAlpha>0)learningDrawPairs.forEach(([a,b],i)=>{
+        const sample=G.rotateGaussianDraw(learningGp.mean,a,b,drawAngle+i*.7);
+        line(ctx,learningGrid.map((x,j)=>left.map([x,sample[j]])),C.blue,1.8,posteriorAlpha);
+      });
+      line(ctx,learningGrid.map((x,i)=>left.map([x,learningGp.mean[i]])),C.orange,3.2,.96);
+      learningInputs.forEach((x,i)=>{
+        const p=left.map([x,learningTargets[i]]);
+        dot(ctx,p,5.5,C.ink);ring(ctx,p,8.5,C.paper,.95,2.5);
+      });
+      ctx.restore();
+      legend(ctx,'Posterior mean',67,400,C.orange);
+      if(stage>=1)legend(ctx,'Posterior draws',316,400,C.blue);
+      text(ctx,stage>=1?'A distribution over possible models':'One fitted model',304,455,20,stage>=1?C.teal:C.orange,'center');
+    },
+    mountains(ctx,t,stage) {
+      t*=2;
+      drawMountainTerrain(ctx);
+      const start=mountainProject(mountainRoute.at(0)),end=mountainProject(mountainRoute.at(1));
+      const tunnelProgress=stage>=2?1:G.clamp((t-.4)/6);
+      if(stage>=1) {
+        // Opacity follows actual burial depth, not a hand-picked screen region.
+        const stroke=ctx.createLinearGradient(...start,...end),halo=ctx.createLinearGradient(...start,...end);
+        for(let i=0;i<=160;i++) {
+          const u=i/160,opacity=G.undergroundOpacity(mountainRoute.straightAt(u));
+          stroke.addColorStop(u,`rgba(207,112,76,${opacity})`);
+          halo.addColorStop(u,`rgba(250,249,246,${opacity*.8})`);
+        }
+        const points=[start,G.mix(start,end,tunnelProgress)];
+        line(ctx,points,halo,7);line(ctx,points,stroke,3.5);
+        text(ctx,'Straight line',80,31,26,C.orange);
+      }
+      const progress=stage>=2?G.clamp((t-.4)/8):0;
+      if(stage>=2) {
+        const route=u=>mountainProject(mountainRoute.at(u));
+        arcPath(ctx,route,progress,C.paper,11,.95);
+        arcPath(ctx,route,progress,C.teal,5.5);
+        text(ctx,'Geodesic',1200,31,26,C.teal,'right');
+      }
+      dot(ctx,start,5,C.teal);ring(ctx,start,10,C.teal,.3,2);
+      dot(ctx,end,5,C.teal);ring(ctx,end,10,C.teal,.3,2);
+      text(ctx,'Start',start[0]-10,start[1]+37,23,C.ink,'center');
+      text(ctx,'Destination',end[0]+8,end[1]+37,23,C.ink,'center');
+      const point=stage===1?mountainRoute.straightAt(tunnelProgress):mountainRoute.at(progress);
+      const moving=stage===1?tunnelProgress>0&&tunnelProgress<1:stage>=2&&progress>0&&progress<1;
+      traveller(ctx,mountainProject(point),t,moving,stage===1?G.undergroundOpacity(point):1);
+    },
+    target(ctx,t,stage) {
+      const ch=chart(342,17,750,422,-2.85,4,-2.95,2.95);
+      bananaPlot(ctx,ch);
+      if(stage>=1) {
+        const n=stage>=2?targetSamples.length:Math.floor(targetSamples.length*frac(t,0,5));
+        targetSamples.slice(0,n).forEach(point=>dot(ctx,ch.map(point),3.3,C.teal,stage>=2?.2:.6));
+        text(ctx,'Samples',34,255,29,C.teal);
+        text(ctx,'represent uncertainty',34,291,23,C.muted);
+        if(stage>=2) {
+          const reveal=frac(t,0,.7),screenRegion=integrationRegion.map(ch.map);
+          polygon(ctx,screenRegion,C.orange,.055*reveal);
+          targetSamples.filter(point=>G.pointInPolygon(point,integrationRegion))
+            .forEach(point=>dot(ctx,ch.map(point),4,C.orange,.85*reveal));
+          line(ctx,[...screenRegion,screenRegion[0]],C.orange,4,reveal);
+          text(ctx,'Probability of the highlighted region',717,451,27,C.teal,'center',600);
+          text(ctx,`${integrationCount} / ${targetSamples.length} samples  ≈  ${Math.round(100*integrationCount/targetSamples.length)}%`,717,481,20,C.muted,'center',500);
+        }
+      } else {
+        dot(ctx,ch.map(G.banana([0,0])),8,C.orange);
+        text(ctx,'One estimate',34,255,29,C.orange);
+      }
+      text(ctx,'Target distribution',1120,27,22,C.muted,'right');
+    },
+    geodesics(ctx,t,stage) {
+      t*=2;
+      const left=chart(8,70,566,346,-2.85,3.6,-2.95,2.95),right=chart(701,70,566,346,-2.85,3.6,-2.95,2.95);
+      text(ctx,'Straight paths',left.x,22,27,C.orange);text(ctx,'Geodesic paths',right.x,22,27,C.teal);
+      bananaPlot(ctx,left,true);bananaPlot(ctx,right,true,stage?1:.35);
+      const s=frac(t,.25,4.5);
+      const seeds=[[2.1,.3],[-2,.4],[1.4,-.8],[-1.4,-.7],[.9,1.3],[-.75,1.2]];
+      seeds.forEach(z=>{
+        const eu=u=>left.map([-1.3+.48*z[1]*u,z[0]*u]);
+        const geo=u=>right.map(G.banana(z.map(a=>a*u)));
+        arcPath(ctx,eu,stage?1:s,C.orange,2.6,.8);dot(ctx,eu(stage?1:s),6,C.orange);
+        if(stage){arcPath(ctx,geo,s,C.teal,2.6,.85);dot(ctx,geo(s),6,C.teal);}
+      });
+      dot(ctx,left.map([-1.3,0]),7,C.ink);dot(ctx,right.map([-1.3,0]),7,C.ink);
+      text(ctx,'Same starting point and initial velocities',640,460,21,C.muted,'center');
+    },
+    slice(ctx,t,stage) {
+      const ch=chart(132,52,1038,273,-3.3,3.3,0,1.28),baseline=397,trueLine=452;
+      const px=x=>ch.map([x,0])[0], red='#ad5651';
+      const values=Array.from({length:401},(_,i)=>-3.3+6.6*i/400);
+      line(ctx,values.map(x=>ch.map([x,sliceDensity(x)])),C.ink,3);
+      line(ctx,[ch.map([-3.3,0]),ch.map([3.3,0])],C.line,2);
+      const levelY=ch.map([0,sliceLevel])[1];
+      line(ctx,[ch.map([-3.3,sliceLevel]),ch.map([3.3,sliceLevel])],C.orange,1.8,.75,[7,7]);
+      text(ctx,'Slice level s',153,levelY-20,21,C.orange);
+      line(ctx,[[px(-3.3),baseline],[px(3.3),baseline]],C.line,1.5,1,[5,7]);
+      line(ctx,[[px(-3.3),trueLine],[px(3.3),trueLine]],C.line,1.7);
+      sliceTrueSegments.forEach(([a,b])=>line(ctx,[[px(a),trueLine],[px(b),trueLine]],C.orange,9));
+      text(ctx,'True slice L(s)',151,476,19,C.orange);
+
+      const rightStops=[sliceSteps.initial[1],...sliceSteps.rightSteps];
+      const leftStops=[sliceSteps.initial[0],...sliceSteps.leftSteps];
+      let left,right,status;
+      if(stage===0) {
+        const open=frac(t,.2,1.1);
+        left=sliceCurrent+(sliceSteps.initial[0]-sliceCurrent)*open;
+        right=sliceCurrent+(sliceSteps.initial[1]-sliceCurrent)*open;
+        status='Randomly place an interval of width w around the current point';
+      } else if(stage===1) {
+        right=stepOutPosition(rightStops,t,.4);
+        left=stepOutPosition(leftStops,t,3.2);
+        status=t<3.2?'Step out to the right':t<6?'Then step out to the left':'Both endpoints lie below the slice level';
+      } else {
+        left=sliceSteps.bracket[0];
+        right=stage===2?sliceSteps.bracket[1]+(sliceRejected-sliceSteps.bracket[1])*frac(t,1.35,1.1):sliceRejected;
+        status=stage===2?(t<1.35?'Draw a proposal outside the slice':'Reject it and shrink the right edge'):(t<.9?'Draw again from the shrunken bracket':'Accept a point inside the slice');
+      }
+      text(ctx,status,640,20,22,C.ink,'center');
+      line(ctx,[[px(left),baseline],[px(right),baseline]],C.blue,5);
+      for(const edge of [left,right]) {
+        line(ctx,[[px(edge),baseline-11],[px(edge),baseline+11]],C.blue,3);
+        dot(ctx,ch.map([edge,sliceDensity(edge)]),5,sliceDensity(edge)<sliceLevel?C.orange:C.blue);
+      }
+      if(stage<=1) {
+        const a=px(stage===0?left:sliceSteps.initial[0]),b=px(stage===0?right:sliceSteps.initial[1]);
+        if(b-a>8) {
+          line(ctx,[[a,baseline-26],[b,baseline-26]],C.blue,1.7,.7);
+          text(ctx,'w',(a+b)/2,baseline-44,19,C.blue,'center');
+        }
+      }
+      dot(ctx,[px(sliceCurrent),baseline],8,C.teal);
+      text(ctx,'current',px(sliceCurrent),425,19,C.teal,'center');
+      if(stage>=2&&t>.2) {
+        const progress=frac(t,.2,.7),x=sliceCurrent+(sliceRejected-sliceCurrent)*progress;
+        if(progress<1)dot(ctx,[px(x),baseline],7,red);
+        else {
+          text(ctx,'×',px(sliceRejected),baseline,32,red,'center');
+          text(ctx,'rejected',px(sliceRejected),359,19,red,'center');
+        }
+      }
+      if(stage>=3&&t>.2) {
+        const progress=frac(t,.2,.7),x=sliceCurrent+(sliceAccepted-sliceCurrent)*progress;
+        dot(ctx,[px(x),baseline],8,C.teal);
+        if(progress===1)text(ctx,'accepted',px(sliceAccepted),359,19,C.teal,'center');
+      }
+    },
+    modes(ctx,t) {
+      t*=2;
+      const ch=chart(110,65,1060,330,-3.5,3.5,-1.2,1.2);
+      for(const x of [-2.1,2.1])for(const r of [.4,.75,1.1]) {
+        const pts=Array.from({length:101},(_,i)=>ch.map([x+r*Math.cos(i/100*tau),r*.65*Math.sin(i/100*tau)]));
+        line(ctx,pts,C.teal,1.8,.36);
+      }
+      text(ctx,'One possibility',ch.map([-2.1,0])[0],25,26,C.ink,'center');
+      text(ctx,'Another possibility',ch.map([2.1,0])[0],25,26,C.ink,'center');
+      text(ctx,'Low probability',640,380,23,C.muted,'center');
+      // A full traversal at constant Riemannian speed. No easing changes its timing.
+      const progress=G.clamp((t-.7)/8),end=inverseTraversal(progress);
+      line(ctx,[ch.map([-2.1,0]),ch.map([2.1,0])],C.line,1.7,1,[4,8]);
+      line(ctx,[ch.map([-2.1,0]),ch.map([end.x,0])],C.teal,3);
+      dot(ctx,ch.map([end.x,0]),9,C.teal);ring(ctx,ch.map([end.x,0]),17,C.teal,.15,7);
+      for(let i=0;i<=24;i++){const p=i/24;if(p<=progress)dot(ctx,ch.map([inverseTraversal(p).x,0]),2.8,C.teal,.5);}
+      text(ctx,'Inverse generative metric',640,432,22,C.teal,'center');
+      text(ctx,'Points mark equal time intervals',640,466,20,C.muted,'center');
+    },
+    simplex(ctx,t,stage) {
+      const tr=triangle(879,251,431);drawTriangle(ctx,tr,{gridLines:stage>=1});
+      let p=[1/3,1/3,1/3];
+      if(stage===1)p=G.mix(p,[.6,.3,.1],frac(t,0,3));
+      if(stage>=2) {
+        const q=G.clamp(t/7),anchors=[[.6,.3,.1],[.12,.73,.15],[.1,.15,.75],[.6,.3,.1]];
+        const seg=Math.min(2,Math.floor(q*3));p=G.mix(anchors[seg],anchors[seg+1],ease(q*3-seg));
+      }
+      text(ctx,'An unclear character',25,41,24,C.muted);
+      // The teaching example is displayed as a low-resolution image, like MNIST.
+      pixelGlyph(ctx,'A?',105,154,148,.9);
+      if(stage>=1) {
+        letters.forEach((letter,k)=>{
+          const y=261+k*66;text(ctx,letter,28,y,29,colors[k], 'left',500);
+          line(ctx,[[72,y],[332,y]],C.line,8,.45);
+          line(ctx,[[72,y],[72+260*p[k],y]],colors[k],8);
+          text(ctx,`${Math.round(p[k]*100)}%`,414,y,28,colors[k],'right');
+        });
+        const point=tr.map(p);dot(ctx,point,9,C.ink);ring(ctx,point,16,C.paper,1,3);
+      } else {text(ctx,'A     B     C',28,302,32,C.ink);}
+    },
+    ilr(ctx,t,stage) {
+      t*=2;
+      const tr=triangle(288,244,424),ch=chart(782,39,417,386,-3.3,3.3,-3.3,3.3);
+      drawTriangle(ctx,tr);grid(ctx,ch,3);
+      text(ctx,'Probability simplex',288,461,24,C.ink,'center');text(ctx,'Euclidean coordinates',991,461,24,C.ink,'center');
+      text(ctx,'Isometric',642,183,25,C.ink,'center');
+      text(ctx,'Logratio',642,216,25,C.ink,'center');
+      line(ctx,[[548,271],[736,271]],C.muted,3);line(ctx,[[548,271],[568,260]],C.muted,3);line(ctx,[[548,271],[568,282]],C.muted,3);line(ctx,[[736,271],[716,260]],C.muted,3);line(ctx,[[736,271],[716,282]],C.muted,3);
+      if(stage>=2) {
+        const a=frac(t,0,3);
+        [.7,1.35,2,2.7].forEach(r=>{
+          const points=Array.from({length:181},(_,i)=>[r*Math.cos(i/180*tau),r*Math.sin(i/180*tau)]);
+          line(ctx,points.map(z=>ch.map(z)),C.teal,1.5,.5*a);
+          line(ctx,points.map(z=>tr.map(G.inverseIlr(z))),C.teal,1.5,.5*a);
+        });
+      }
+      const a=G.ilr([.12,.7,.18]),b=G.ilr([.72,.09,.19]);
+      const progress=stage>=1?(stage>=2?1:frac(t,0,6)):0;
+      if(stage>=1) {
+        const path=u=>G.mix(a,b,u);
+        arcPath(ctx,u=>ch.map(path(u)),progress,C.orange,3);
+        arcPath(ctx,u=>tr.map(G.inverseIlr(path(u))),progress,C.orange,3);
+      }
+      const z=G.mix(a,b,progress);dot(ctx,ch.map(z),8,C.orange);dot(ctx,tr.map(G.inverseIlr(z)),8,C.orange);
+    },
+    interpolation(ctx,t,stage) {
+      t*=2;
+      const tr=triangle(502,235,433);drawTriangle(ctx,tr);
+      const s=stage>=1?frac(t,0,5):0;
+      if(stage>=1)for(let k=0;k<3;k++) {
+        const vertices=tr.v.map((_,j)=>G.interpolateCategory(k,[j===0?1:0,j===1?1:0,j===2?1:0]));
+        polygon(ctx,vertices.map(p=>tr.map(p)),colors[k],.075*s);
+      }
+      categoryPoints.forEach(({p,k})=>{
+        const vertex=[0,0,0];vertex[k]=1;dot(ctx,tr.map(G.mix(vertex,p,s)),stage?3:5,colors[k],stage?.43:1);
+      });
+      text(ctx,stage?'Continuous representations':'Observed categories',980,80,26,C.ink,'center');
+      if(stage===0)letters.forEach((l,k)=>text(ctx,l,854+k*124,241,60,colors[k],'center'));
+      if(stage>=1) {
+        text(ctx,'The original category',978,218,24,C.muted,'center');
+        text(ctx,'remains largest',978,254,24,C.muted,'center');
+      }
+    },
+    gaussianInterpolation(ctx,t,stage) {
+      t*=2;
+      const ch=chart(42,60,530,344,-3.3,3.3,-3.1,3.1),tr=triangle(942,244,416);
+      grid(ctx,ch,3);drawTriangle(ctx,tr);
+      text(ctx,'ILR coordinates',306,23,26,C.ink,'center');
+      text(ctx,'Mapped to the simplex',942,23,26,C.ink,'center');
+      const sigma=stage===0?0:stage===1?.42*frac(t,0,4):.42+.47*frac(t,0,4);
+      if(stage>=1) gaussianInterpolationPoints.forEach(({k,noise})=>{
+        const center=gaussianInterpolationCenters[k].z;
+        const z=[center[0]+sigma*noise[0],center[1]+sigma*noise[1]];
+        dot(ctx,ch.map(z),3.1,colors[k],.42);
+        dot(ctx,tr.map(G.inverseIlr(z)),3.1,colors[k],.42);
+      });
+      gaussianInterpolationCenters.forEach(({p,z},k)=>{
+        dot(ctx,ch.map(z),8,colors[k]);ring(ctx,ch.map(z),12,C.paper,1,2.2);
+        dot(ctx,tr.map(p),8,colors[k]);ring(ctx,tr.map(p),12,C.paper,1,2.2);
+      });
+      text(ctx,stage>=2?'More noise: components overlap':stage===1?'Less noise: distinct components':'Class centers',640,459,23,stage>=2?C.orange:C.muted,'center');
+    },
+    multiclass(ctx,t,stage) {
+      t*=2;
+      const transition=stage?frac(t,0,.7):0;
+      // Training examples and labels are explicit, separate from the unseen input.
+      if(transition<1) {
+        ctx.save();ctx.globalAlpha=1-transition;
+        text(ctx,'Labelled examples',230,42,27,C.ink,'center');
+        text(ctx,'Character',158,91,21,C.muted,'center');text(ctx,'Label',356,91,21,C.muted,'center');
+        letters.forEach((letter,k)=>{
+          const y=156+k*99;
+          [-1,0,1].forEach((offset,j)=>pixelGlyph(ctx,letter,158+offset*56,y,45,1,j+1));
+          text(ctx,letter,356,y,30,colors[k],'center',500);
+          line(ctx,[[405,y],[581,230]],C.line,1.6);
+          if(!stage){const s=frac(t,k*.35,3.5);dot(ctx,G.mix([405,y],[581,230],s),5,colors[k],.85);}
+        });
+        ctx.restore();
+      }
+      ring(ctx,[690,230],88,C.ink,1,1.7);
+      text(ctx,'Classifier',690,230,28,C.ink,'center',500);
+      text(ctx,'Possible classes',1090,63,26,C.ink,'center');
+      letters.forEach((letter,k)=>{
+        const y=132+k*98;
+        line(ctx,[[797,230],[1026,y]],C.line,1.6);
+        text(ctx,letter,1090,y,40,stage&&k===1&&t>3.2?C.orange:C.muted,'center',500);
+      });
+      if(stage) {
+        ctx.save();ctx.globalAlpha=transition;
+        text(ctx,'New input',230,65,27,C.ink,'center');
+        pixelGlyph(ctx,'B?',230,230,132,1);
+        line(ctx,[[319,230],[579,230]],C.line,1.6);
+        const into=frac(t,.8,2.2),out=frac(t,3,1.8);
+        line(ctx,[[319,230],[319+260*into,230]],C.orange,2.6);
+        if(into>0&&into<1)dot(ctx,[319+260*into,230],6,C.orange);
+        if(out>0){line(ctx,[[797,230],[797+229*out,230]],C.orange,2.6);dot(ctx,[797+229*out,230],5,C.orange);}
+        if(out>.9){ring(ctx,[1090,230],43,C.orange,1,2.5);text(ctx,'Predicted class',1090,416,24,C.orange,'center');}
+        ctx.restore();
+      }
+    },
+    classification(ctx,t) {
+      t*=2;
+      const ch=chart(67,71,393,328,-2.2,2.2,-2.2,2.2),tr=triangle(942,239,408);
+      text(ctx,'Latent Gaussian prediction',260,20,26,C.ink,'center');text(ctx,'Predicted probabilities',942,20,26,C.ink,'center');
+      grid(ctx,ch,2);drawTriangle(ctx,tr);
+      const center=G.ilr([.6,.28,.12]),progress=frac(t,0,5);
+      const points=gaussian.slice(0,230),count=Math.floor(points.length*progress);
+      const probabilities=[];
+      points.slice(0,count).forEach(([u,v])=>{
+        const z=[center[0]+.32*u,center[1]+.23*v+.08*u];const p=G.inverseIlr(z);probabilities.push(p);
+        dot(ctx,ch.map(z),3,C.teal,.3);dot(ctx,tr.map(p),3,C.teal,.3);
+      });
+      if(count){const mean=probabilities.reduce((sum,p)=>sum.map((x,i)=>x+p[i]/count),[0,0,0]);dot(ctx,tr.map(mean),7,C.orange);}
+      text(ctx,'Map and average',638,211,22,C.muted,'center');
+      text(ctx,'Inverse ILR',638,247,24,C.ink,'center',500);
+      line(ctx,[[527,282],[747,282]],C.muted,1.4);line(ctx,[[747,282],[733,275]],C.muted);line(ctx,[[747,282],[733,289]],C.muted);
+      text(ctx,'Monte Carlo prediction',941,459,21,C.muted,'center');
+    },
+    closing(ctx,t) {
+      const ch=chart(48,42,500,225,-2.85,3.6,-2.95,2.95),tr=triangle(988,156,250);
+      bananaPlot(ctx,ch);
+      const s=frac(t,0,4);
+      gaussian.slice(0,170).forEach(z=>dot(ctx,ch.map(G.banana(z.map(a=>a*s))),2.4,C.teal,.45));
+      drawTriangle(ctx,tr,{labels:false});
+      categoryPoints.slice(0,150).forEach(({p,k})=>dot(ctx,tr.map(G.mix([1/3,1/3,1/3],p,s)),2.5,colors[k],.47));
+      text(ctx,'Bayesian inference',298,17,28,C.teal,'center',500);text(ctx,'Modeling discrete data',988,17,28,C.orange,'center',500);
+      text(ctx,'Choose the paths',298,326,23,C.teal,'center');text(ctx,'Choose the coordinates',988,326,23,C.orange,'center');
+    },
+  };
+
+  function stageOf(section) { return [...section.querySelectorAll('.scene-step')].filter(el=>el.classList.contains('visible')).length; }
+  function updateStage(section,forced) {
+    const stage=forced ?? stageOf(section);section.dataset.stage=stage;
+    const caption=section.querySelector('.stage-caption');
+    if(caption) {
+      const name=section.dataset.scene;
+      if(name==='mountains')caption.textContent=['A landscape analogy for paths in posterior inference','The straight line ignores the topography.','The metric bends the path around the terrain'][Math.min(stage,2)];
+    }
+    return stage;
+  }
+  function render(section,time,forcedStage) {
+    const canvas=section?.querySelector('canvas');if(!canvas)return;
+    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+    const stage=updateStage(section,forcedStage);
+    scenes[section.dataset.scene]?.(ctx,time,stage);
+  }
+  function tick(now) {
+    request=0;
+    if(!active||paused||reduced||printMode||document.hidden||Reveal.isOverview()||Reveal.isPaused()) {previousTime=0;return;}
+    if(previousTime)elapsed+=(now-previousTime)/1000;previousTime=now;
+    render(active,elapsed);
+    const learningWiggles=active.dataset.scene==='learning'&&stageOf(active)===1;
+    if(elapsed<12||learningWiggles)request=requestAnimationFrame(tick);
+  }
+  function restart() {
+    cancelAnimationFrame(request);request=0;previousTime=0;elapsed=0;
+    if(active){render(active,(reduced||printMode)?12:0);if(!paused&&!reduced&&!printMode)request=requestAnimationFrame(tick);}
+  }
+  function resume() {
+    const learningWiggles=active?.dataset.scene==='learning'&&stageOf(active)===1;
+    previousTime=0;if(!request&&!paused&&!reduced&&!printMode&&(elapsed<12||learningWiggles))request=requestAnimationFrame(tick);
+  }
+  function setSlide(event) {active=event.currentSlide;restart();}
+  function toggleMotion() {
+    if(reduced){reduced=false;paused=false;restart();}
+    else {paused=!paused;if(!paused)resume();else{cancelAnimationFrame(request);request=0;}}
+    const button=document.getElementById('motion');button.textContent=paused?'Resume motion':'Pause motion';button.setAttribute('aria-pressed',String(paused));
+  }
+  function help() {const dialog=document.getElementById('help-dialog');if(dialog.open)dialog.close();else dialog.showModal();}
+  function printAll() {sections.forEach(section=>render(section,12,section.querySelectorAll('.scene-step').length));}
+  document.getElementById('replay').addEventListener('click',restart);
+  document.getElementById('motion').addEventListener('click',toggleMotion);
+  document.getElementById('help').addEventListener('click',help);
+  document.getElementById('close-help').addEventListener('click',()=>document.getElementById('help-dialog').close());
+  window.addEventListener('beforeprint',printAll);
+  window.addEventListener('afterprint',()=>{if(active){render(active,elapsed);resume();}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(request);request=0;previousTime=0;}else resume();});
+  media.addEventListener('change',event=>{reduced=event.matches||stillMode;restart();});
+  Reveal.initialize({
+    width:1440,height:810,margin:.025,minScale:.15,maxScale:2,
+    hash:true,hashOneBasedIndex:false,controls:true,controlsLayout:'edges',
+    controlsBackArrows:'visible',progress:true,center:false,slideNumber:'c/t',
+    transition:reduced?'none':'fade',transitionSpeed:'fast',backgroundTransition:'none',
+    autoSlide:0,loop:false,disableLayout:false,pdfSeparateFragments:false,pdfMaxPagesPerSlide:1,
+    keyboard:{
+      49:()=>Reveal.slide(0,0,-1),
+      48:()=>Reveal.slide(sections.length-1,0,-1),
+      82:restart,77:toggleMotion,72:help,
+    },
+  }).then(()=>{
+    // Reveal creates this empty placeholder even without its notes plugin.
+    Reveal.getRevealElement().querySelector('.speaker-notes')?.remove();
+    active=Reveal.getCurrentSlide();
+    // Render every scene once, including slides that have not yet been visited.
+    // This makes overview and PDF mode legible without running hidden animations.
+    sections.forEach(section=>render(section,12,printMode?section.querySelectorAll('.scene-step').length:0));
+    if(printMode)printAll();else restart();
+    document.documentElement.dataset.seminarReady='true';
+  });
+  Reveal.on('slidechanged',setSlide);
+  Reveal.on('fragmentshown',restart);Reveal.on('fragmenthidden',restart);
+  Reveal.on('overviewshown',()=>{cancelAnimationFrame(request);request=0;sections.forEach(section=>render(section,12));});
+  Reveal.on('overviewhidden',()=>{active=Reveal.getCurrentSlide();restart();});
+  Reveal.on('paused',()=>{cancelAnimationFrame(request);request=0;});Reveal.on('resumed',resume);
+})();
