@@ -115,7 +115,7 @@ sitemap: false
           <div><h3>Riemannian Laplace</h3><p class="tex route-equation" data-display="true">\boldsymbol{x}=\operatorname{Exp}_{\hat{\boldsymbol{x}}}(\boldsymbol{v})</p><p>Push the tangent Gaussian along geodesics</p></div>
         </div>
         <p class="bottom-caption">The metric changes where the same tangent draws land</p>
-        <p class="source">Paper I · The next slide compares Euclidean and Fisher Riemannian Laplace at the Hausdorff MAP</p>
+        <p class="source">Bergamin et al. (2023), <cite>Riemannian Laplace Approximations for Bayesian Neural Networks</cite> · NeurIPS 36. Paper I uses the Fisher metric.</p>
       </section>
 
       <section data-name="An approximation that follows curvature" data-scene="evidence" data-part="inference" class="evidence-slide">
@@ -147,7 +147,7 @@ sitemap: false
           <figure><figcaption>Riemannian: a geodesic</figcaption><img src="assets/paper2/hitandrun/geodesic_balls_monge_hitandrun.png" alt="Thesis hit-and-run figure: a direction sampled using the local metric gives a curved red dashed geodesic through the target contours"></figure>
         </div>
         <p class="bottom-caption compact-caption tex" data-display="true">\boldsymbol{v}\sim\operatorname{Unif}(\mathbb{S}^{D-1}),\quad\gamma_{(\boldsymbol{x},\boldsymbol{v})}(t)=\boldsymbol{x}+t\boldsymbol{v},\quad\boldsymbol{x}'=\gamma_{(\boldsymbol{x},\boldsymbol{v})}(t^*)</p>
-        <p class="source">Thesis, “Visualization of the hit-and-run procedure” · Paper II replaces the line and direction sphere with their metric counterparts</p>
+        <p class="source">Thesis hit-and-run figure · Durmus et al. (2026), <cite>Geodesic Slice Sampling on Riemannian Manifolds</cite>, Biometrika</p>
       </section>
 
       <section data-name="Reaching separated possibilities" data-scene="modes" data-part="inference">
@@ -191,6 +191,7 @@ sitemap: false
         </div>
         <canvas width="1280" height="490" role="img" aria-label="Isometric Logratio coordinates map the probability simplex to Euclidean space; a straight line and circles correspond to an Aitchison geodesic and equal-distance curves inside the simplex"></canvas>
         <p class="bottom-caption compact-caption">CLR reaches the zero-sum hyperplane; Helmert ILR is isometric; ALR and stick-breaking are not</p>
+        <p class="source">Aitchison (1986), <cite>The Statistical Analysis of Compositional Data</cite> · Egozcue et al. (2003), <cite>Isometric Logratio Transformations for Compositional Data Analysis</cite></p>
         <span class="fragment scene-step" data-fragment-index="0"></span>
         <span class="fragment scene-step" data-fragment-index="1"></span>
       </section>
@@ -249,7 +250,7 @@ sitemap: false
           <div class="flow-stage flow-path"><span class="flow-marker">→</span><div><h3>Fit the velocity along a path</h3><p class="tex">\boldsymbol z_t=(1-t)\boldsymbol z_0+t\boldsymbol z_1</p><p class="tex">\boldsymbol v_\theta(\boldsymbol z_t,t)\approx\boldsymbol z_1-\boldsymbol z_0</p><p>Generate by integrating <span class="tex">\boldsymbol v_\theta</span>, then apply <span class="tex">\varphi^{-1}</span> and <span class="tex">\arg\max</span>.</p></div></div>
         </div>
         <p class="bottom-caption compact-caption">Blue shows a linear training path; generation follows the learned velocity field</p>
-        <p class="source">Paper III · On Text8, the method was competitive among continuous approaches; a discrete diffusion model performed best overall</p>
+        <p class="source">Lipman et al. (2023), <cite>Flow Matching for Generative Modeling</cite> · Albergo &amp; Vanden-Eijnden (2023), <cite>Building Normalizing Flows with Stochastic Interpolants</cite> · ICLR</p>
       </section>
 
       <section data-name="Multiclass classification" data-scene="multiclass" data-part="discrete">
@@ -273,7 +274,7 @@ sitemap: false
           <p class="tex" data-display="true">\mu_*^{(d)}=\mathbf k_*^\top(\mathbf K_N+\sigma^2\mathbf I_N)^{-1}\boldsymbol z^{(d)}</p>
           <p class="tex" data-display="true">\sigma_*^2=k_{**}-\mathbf k_*^\top(\mathbf K_N+\sigma^2\mathbf I_N)^{-1}\mathbf k_*</p>
         </div>
-        <p class="source">Paper IV · Thesis likelihood illustration for three classes · Full ILR had the lowest calibration error on three small UCI tasks</p>
+        <p class="source">Related baseline: Milios et al. (2018), <cite>Dirichlet-Based Gaussian Processes for Large-Scale Calibrated Classification</cite> · Paper IV</p>
       </section>
 
       <section data-name="Classification with uncertainty" data-scene="classification" data-part="discrete" class="classification-slide">
@@ -317,6 +318,147 @@ sitemap: false
             </article>
           </div>
         </div>
+      </section>
+
+      <section data-name="Appendix" class="part-divider part-appendix" data-part="appendix">
+        <p class="part-label">Appendix</p>
+        <h2>Methods and<br>additional results</h2>
+      </section>
+
+      <section data-name="Laplace approximation: a local Gaussian" data-part="appendix" class="appendix-slide appendix-laplace-slide">
+        <h2>Laplace approximation: a local Gaussian</h2>
+        <div class="appendix-laplace-layout">
+          <figure>
+            <img src="assets/appendix/laplace-approximation.svg" alt="An illustrative asymmetric density and a Gaussian approximation have the same mode and local curvature but diverge in the tails">
+            <figcaption>Curves scaled to agree at the mode. The fit is local.</figcaption>
+          </figure>
+          <div class="appendix-derivation">
+            <div class="appendix-derivation-step">
+              <h3>1 · Find the mode</h3>
+              <p class="tex" data-display="true">\ell(\boldsymbol x)=\log p(\boldsymbol x),\qquad \hat{\boldsymbol x}=\arg\max_{\boldsymbol x}\ell(\boldsymbol x)</p>
+            </div>
+            <div class="appendix-derivation-step">
+              <h3>2 · Keep the second-order term</h3>
+              <p class="tex" data-display="true">\begin{aligned}\boldsymbol\delta&=\boldsymbol x-\hat{\boldsymbol x},\\
+                \ell(\boldsymbol x)&\approx\ell(\hat{\boldsymbol x})+\underbrace{\nabla\ell(\hat{\boldsymbol x})^\top\boldsymbol\delta}_{=0}\\[-2pt]
+                &\quad+\tfrac12\boldsymbol\delta^\top\nabla^2\ell(\hat{\boldsymbol x})\boldsymbol\delta.\end{aligned}</p>
+            </div>
+            <div class="appendix-derivation-step">
+              <h3>3 · Exponentiate and normalize</h3>
+              <p class="tex" data-display="true">\begin{aligned}\mathbf\Sigma^{-1}&=-\nabla^2\ell(\hat{\boldsymbol x}),\\ q(\boldsymbol x)&=\mathcal N\!\left(\boldsymbol x\mid\hat{\boldsymbol x},\mathbf\Sigma\right).\end{aligned}</p>
+            </div>
+          </div>
+        </div>
+        <p class="source">Background chapter · MacKay (2003), <cite>Information Theory, Inference and Learning Algorithms</cite> · Figure is an illustrative construction</p>
+      </section>
+
+      <section data-name="Metric choices: Fisher and Monge" data-part="appendix" class="appendix-slide appendix-metric-slide">
+        <h2>Metric choices: Fisher and Monge</h2>
+        <p class="appendix-lead">Both panels use the Euclidean MAP; the metric changes the Riemannian Laplace draws.</p>
+        <div class="appendix-metric-grid">
+          <figure class="appendix-metric-card">
+            <h3>Fisher</h3>
+            <p class="tex metric-card-equation" data-display="true">\begin{aligned}\mathbf G_{\mathrm F}(\boldsymbol x)=\mathbb E_{\mathcal Y|\mathcal X}\!\bigl[&\nabla_{\boldsymbol x}\log p(\boldsymbol y\mid\boldsymbol x)\\[-2pt]&\nabla_{\boldsymbol x}\log p(\boldsymbol y\mid\boldsymbol x)^\top\bigr]\end{aligned}</p>
+            <img src="assets/appendix/h_banana_fisher.png" alt="Fisher Riemannian Laplace samples in blue following the curved banana target, with the reference mode in red">
+            <figcaption>Local likelihood geometry; blue draws on the banana target.</figcaption>
+          </figure>
+          <figure class="appendix-metric-card">
+            <h3>Monge</h3>
+            <p class="tex metric-card-equation" data-display="true">\mathbf G_{\mathrm M}(\boldsymbol x)=\mathbf I_D+\alpha^2\nabla\ell(\boldsymbol x)\nabla\ell(\boldsymbol x)^\top</p>
+            <img src="assets/appendix/h_banana_monge.png" alt="Monge Riemannian Laplace samples in blue following the curved banana target, with the reference mode in red">
+            <figcaption>RLA-BLog: Monge geometry with log-map correction.</figcaption>
+          </figure>
+        </div>
+        <p class="source">Thesis Ch. 6 and Paper I · Fisher: Amari (2000) · Monge: Hartmann, Girolami &amp; Klami (2022)</p>
+      </section>
+
+      <section data-name="Geodesic balls under generative and Monge metrics" data-part="appendix" class="appendix-slide appendix-balls-slide">
+        <h2>Geodesic balls: generative and Monge</h2>
+        <p class="appendix-lead">Each colored curve is a set of equal geodesic distance from the star.</p>
+        <div class="appendix-metric-grid">
+          <figure class="appendix-metric-card">
+            <h3>Generative metric</h3>
+            <p class="tex metric-card-equation" data-display="true">\begin{aligned}\mathbf G_{\mathrm G}(\boldsymbol x)&=\rho(\boldsymbol x)^2\mathbf I_D,\\[-2pt]\rho(\boldsymbol x)&=\frac{p_0+\lambda}{p(\boldsymbol x)+\lambda}.\end{aligned}</p>
+            <img src="assets/appendix/geodesic_balls_generative.png" alt="Geodesic balls under the generative metric bend around a curved target density">
+            <figcaption>High-density regions have shorter metric length.</figcaption>
+          </figure>
+          <figure class="appendix-metric-card">
+            <h3>Monge metric</h3>
+            <p class="tex metric-card-equation" data-display="true">\mathbf G_{\mathrm M}(\boldsymbol x)=\mathbf I_D+\alpha^2\nabla\ell(\boldsymbol x)\nabla\ell(\boldsymbol x)^\top</p>
+            <img src="assets/appendix/geodesic_balls_monge.png" alt="Geodesic balls under the Monge metric bend more strongly along the curved target density">
+            <figcaption>The log-density surface gives stronger bending here.</figcaption>
+          </figure>
+        </div>
+        <p class="source">Thesis Ch. 6, Figure “metric visualization” · Paper II · Generative metric: Kim et al. (2024)</p>
+      </section>
+
+      <section data-name="Inverse metrics across low-density regions" data-part="appendix" class="appendix-slide appendix-inverse-slide">
+        <h2>Inverse metrics across low-density regions</h2>
+        <p class="appendix-lead tex" data-display="true">\mathbf G_{\mathrm{inv}}(\boldsymbol x)=\mathbf G(\boldsymbol x)^{-1}</p>
+        <div class="appendix-metric-grid">
+          <figure class="appendix-metric-card">
+            <h3>Inverse generative</h3>
+            <p class="tex metric-card-equation" data-display="true">\mathbf G_{\mathrm G,inv}(\boldsymbol x)=\rho(\boldsymbol x)^{-2}\mathbf I_D</p>
+            <img src="assets/appendix/geodesic_inverse_generative.png" alt="Inverse generative geodesics launch from one mode and rapidly traverse the low-density area toward another">
+            <figcaption>Geodesics travel farther in Euclidean space between modes.</figcaption>
+          </figure>
+          <figure class="appendix-metric-card">
+            <h3>Inverse Monge</h3>
+            <p class="tex metric-card-equation" data-display="true">\begin{aligned}\mathbf G_{\mathrm M,inv}(\boldsymbol x)&=\mathbf I_D\\[-2pt]&-\frac{\alpha^2\nabla\ell(\boldsymbol x)\nabla\ell(\boldsymbol x)^\top}{1+\alpha^2\|\nabla\ell(\boldsymbol x)\|^2}.\end{aligned}</p>
+            <img src="assets/appendix/geodesic_inverse_monge.png" alt="Inverse Monge geodesics bend from one mode toward another and speed up through lower-density regions">
+            <figcaption>Low-density travel becomes faster along selected directions.</figcaption>
+          </figure>
+        </div>
+        <p class="source">Thesis Ch. 6, Figure “metric visualization” · Paper II, <cite>Geodesic Slice Sampler for Multimodal Distributions with Strong Curvature</cite></p>
+      </section>
+
+      <section data-name="Sparse ILR-GP with inducing points" data-part="appendix" class="appendix-slide appendix-sparse-slide">
+        <h2>Sparse ILR-GP with inducing points</h2>
+        <p class="appendix-sparse-setup tex" data-display="true">D=K-1,\quad M\ll N,\quad \mathbf u^{(d)}=f^{(d)}(\mathbf X_{\mathrm u})\in\mathbb R^M,\quad d=1,\ldots,D</p>
+        <p class="appendix-lead">Use <em>M</em> inducing inputs to approximate each of the <em>D</em> latent GPs.</p>
+        <div class="appendix-sparse-grid">
+          <article>
+            <p class="appendix-method-tag">C-ILR</p>
+            <h3>Collapsed latent regression</h3>
+            <p>Keep the Gaussian likelihood for the interpolated ILR labels.</p>
+            <p class="tex" data-display="true">z_n^{(d)}\mid f^{(d)}(\boldsymbol r_n)\sim\mathcal N\!\bigl(f^{(d)}(\boldsymbol r_n),\sigma^2\bigr)</p>
+            <p>Eliminate the variational parameters for <span class="tex">q(\mathbf u^{(d)})</span> analytically.</p>
+            <p class="appendix-complexity tex" data-display="true">\mathcal O(NM^2)</p>
+          </article>
+          <article>
+            <p class="appendix-method-tag">U-ILR</p>
+            <h3>Uncollapsed classification</h3>
+            <p>Inverse-map latent functions to class probabilities.</p>
+            <p class="tex" data-display="true">p(c_n=k\mid\mathbf f_n)=\bigl[\varphi^{-1}(\mathbf f_n)\bigr]_k</p>
+            <p>Optimize a variational bound in mini-batches of size <span class="tex">B</span>.</p>
+            <p class="appendix-complexity tex" data-display="true">\mathcal O(BM^2+M^3)</p>
+          </article>
+        </div>
+        <p class="source">Thesis Ch. 5 and Ch. 7 · Paper IV · Titsias (2009), Hensman et al. (2013, 2015)</p>
+      </section>
+
+      <section data-name="Sparse UCI results: classification error" data-part="appendix" class="appendix-slide appendix-results-slide">
+        <h2>Sparse UCI results: classification error</h2>
+        <p class="appendix-results-intro">Seven larger UCI datasets · lower is better</p>
+        <img src="assets/appendix/uci_best_sparse_per_seed_error.png" alt="Classification error with uncertainty bars across seven UCI datasets for LSM, BSM, GPD, SVGPC, C-ILR, and U-ILR">
+        <p class="appendix-results-takeaway">C-ILR and sparse GPD are competitive; U-ILR improves on C-ILR on Letter.</p>
+        <p class="source">Thesis Ch. 7, sparse UCI results · Paper IV · Error bars follow the thesis figure</p>
+      </section>
+
+      <section data-name="Sparse UCI results: negative log likelihood" data-part="appendix" class="appendix-slide appendix-results-slide">
+        <h2>Sparse UCI results: negative log likelihood</h2>
+        <p class="appendix-results-intro">Seven larger UCI datasets · lower is better</p>
+        <img src="assets/appendix/uci_best_sparse_per_seed_nll.png" alt="Negative log likelihood with uncertainty bars across seven UCI datasets for LSM, BSM, GPD, SVGPC, C-ILR, and U-ILR">
+        <p class="appendix-results-takeaway">C-ILR and sparse GPD give strong predictive likelihood across these tasks.</p>
+        <p class="source">Thesis Ch. 7, sparse UCI results · Paper IV · Error bars follow the thesis figure</p>
+      </section>
+
+      <section data-name="Sparse UCI results: expected calibration error" data-part="appendix" class="appendix-slide appendix-results-slide">
+        <h2>Sparse UCI results: expected calibration error</h2>
+        <p class="appendix-results-intro">Seven larger UCI datasets · lower is better</p>
+        <img src="assets/appendix/uci_best_sparse_per_seed_ece.png" alt="Expected calibration error with uncertainty bars across seven UCI datasets for LSM, BSM, GPD, SVGPC, C-ILR, and U-ILR">
+        <p class="appendix-results-takeaway">The sparse ILR variants often have slightly lower calibration error.</p>
+        <p class="source">Thesis Ch. 7, sparse UCI results · Paper IV · Error bars follow the thesis figure</p>
       </section>
     </div>
   </div>

@@ -135,6 +135,44 @@ body { margin:0; background:var(--paper); color:var(--ink); }
 .closing-paper li { padding-left:2px; }
 .inference-papers .closing-paper-meta,.inference-papers .closing-paper li::marker { color:var(--teal); }
 .discrete-papers .closing-paper-meta,.discrete-papers .closing-paper li::marker { color:var(--orange); }
+.reveal .part-appendix { background:#273c43; }
+.reveal section[data-part="appendix"]:not(.part-divider) > h2 { color:var(--teal); }
+.appendix-slide .source { color:#68787c; }
+.appendix-lead { position:absolute; top:119px; left:64px; right:64px; color:var(--muted); font-size:23px; line-height:1.24; }
+.appendix-laplace-layout { position:absolute; top:159px; left:64px; right:64px; display:grid; grid-template-columns:610px minmax(0,1fr); gap:55px; }
+.appendix-laplace-layout figure img { width:610px; height:auto; object-fit:contain; mix-blend-mode:normal; }
+.appendix-laplace-layout figcaption { margin:8px 0 0; color:var(--muted); font-size:19px; }
+.appendix-derivation-step { border-top:2px solid var(--line); padding:14px 0 16px; }
+.appendix-derivation-step:last-child { border-bottom:2px solid var(--line); }
+.appendix-derivation-step h3 { margin:0 0 9px; color:var(--teal); font-size:23px; font-weight:500; }
+.appendix-derivation-step p.tex { font-size:22px; line-height:1.2; }
+.appendix-derivation-step p:not(.tex) { margin:8px 0 0; color:var(--muted); font-size:20px; }
+.appendix-metric-grid { position:absolute; top:163px; left:64px; right:64px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:58px; }
+.appendix-metric-card { min-width:0; }
+.appendix-metric-card h3 { margin:0 0 6px; color:var(--ink); font-size:28px; font-weight:500; }
+.appendix-metric-card .metric-card-equation { display:flex; align-items:center; min-height:82px; font-size:19px; }
+.appendix-metric-card .metric-card-equation .katex-display { width:100%; }
+.reveal .appendix-metric-card img { width:100%; height:335px; object-fit:contain; mix-blend-mode:multiply; }
+.appendix-metric-card figcaption { margin:12px 0 0; color:var(--muted); font-size:20px; line-height:1.2; }
+.appendix-balls-slide .appendix-metric-grid { top:154px; }
+.reveal .appendix-balls-slide .appendix-metric-card img { height:370px; }
+.appendix-inverse-slide .appendix-lead { top:112px; color:var(--ink); font-size:24px; }
+.appendix-inverse-slide .appendix-metric-grid { top:166px; }
+.reveal .appendix-inverse-slide .appendix-metric-card img { height:385px; }
+.appendix-sparse-setup { position:absolute; top:122px; left:64px; right:64px; text-align:center; font-size:25px; }
+.appendix-sparse-slide .appendix-lead { top:183px; text-align:center; }
+.appendix-sparse-grid { position:absolute; top:255px; left:64px; right:64px; display:grid; grid-template-columns:1fr 1fr; gap:62px; }
+.appendix-sparse-grid article { border-top:3px solid var(--orange); padding-top:15px; }
+.appendix-sparse-grid article:first-child { border-color:var(--teal); }
+.appendix-method-tag { margin:0 0 5px!important; color:var(--muted); font-size:17px; letter-spacing:1.2px; font-weight:500; }
+.appendix-sparse-grid h3 { margin:0 0 14px; font-size:29px; font-weight:500; }
+.appendix-sparse-grid article > p:not(.appendix-method-tag) { margin:0 0 17px; font-size:22px; line-height:1.22; }
+.appendix-sparse-grid article > p.tex { font-size:23px; }
+.appendix-sparse-grid article > p.appendix-complexity { margin-top:20px; color:var(--teal); font-size:31px; }
+.appendix-sparse-grid article:last-child > p.appendix-complexity { color:var(--orange); }
+.appendix-results-intro { position:absolute; top:110px; left:64px; right:64px; color:var(--muted); font-size:21px; }
+.reveal .appendix-results-slide > img { position:absolute; top:145px; left:196px; width:1048px; height:555px; object-fit:contain; mix-blend-mode:multiply; }
+.appendix-results-takeaway { position:absolute; top:710px; left:64px; right:64px; color:var(--ink); font-size:22px; text-align:center; }
 .reveal .progress { color:var(--teal); height:3px; }
 .reveal .controls { color:var(--teal); right:12px; bottom:13px; font-size:8px; }
 .reveal .slide-number { font-family:inherit; color:var(--muted); background:none; font-size:14px; right:30px; bottom:9px; }
@@ -156,5 +194,6 @@ dialog button { padding:8px 18px; color:var(--ink); background:none; border:1px 
   .reveal .slides section { background:var(--paper)!important; }
   .reveal .slides section.part-inference { background:var(--teal)!important; }
   .reveal .slides section.part-discrete { background:var(--orange)!important; }
+  .reveal .slides section.part-appendix { background:#273c43!important; }
   .reveal canvas { visibility:visible!important; }
 }
